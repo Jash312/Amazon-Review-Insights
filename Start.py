@@ -2,8 +2,7 @@ from flask import Flask, render_template, request
 import random
 import datetime
 import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
+import plotly.graph_objs as go
 
 app = Flask(__name__)
 
@@ -58,34 +57,28 @@ def generate_plot():
     # Calculate the percentage of positive sentiment within each 1-month window
     percentage_positive_sentiment = (last_sentiment_monthly_sum / last_total_sentiment_monthly_count) * 100
 
-    # Plot the 2-week moving average ratings over time
-    plt.figure(figsize=(10, 6))
-    ratings_2_weeks_ma.plot(linestyle='-')
-    plt.title(f'{window_size}-Day Moving Average Ratings Over Time')
-    plt.xlabel('Date')
-    plt.ylabel(f'{window_size}-Day Moving Average Rating')
-    plt.xticks(rotation=45)
-    plt.xlim(review_df.index.min(), review_df.index.max())
+    # Create Plotly figure for the 2-week moving average ratings
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=ratings_2_weeks_ma.index, y=ratings_2_weeks_ma.values, mode='lines', name=f'{window_size}-Day Moving Average Ratings'))
 
-    legend_patches = [
-        Patch(color='green', alpha=0.3, label='Positive Sentiment (>= 50%)'),
-        Patch(color='yellow', alpha=0.3, label='Neutral Sentiment (>= 40% and < 50%)'),
-        Patch(color='red', alpha=0.3, label='Negative Sentiment (< 40%)')
-    ]
-
+    # Add shaded regions for sentiment percentages
     for month_end_date, percent in percentage_positive_sentiment.items():
         start_of_month = month_end_date - pd.offsets.MonthBegin(1)
-        plt.axvspan(start_of_month, month_end_date , color='green' if percent >= 50 else ('yellow' if percent >= 40 else 'red'), alpha=0.3)
+        color = 'green' if percent >= 50 else 'yellow' if percent >= 40 else 'red'
+        fig.add_shape(type="rect", x0=start_of_month, y0=0, x1=month_end_date, y1=5, fillcolor=color, opacity=0.3)
 
-    plt.legend(handles=legend_patches, loc='upper right')
-    plt.tight_layout()
-    
-    # Save the plot as an image
-    plt.savefig('static/ratings_plot.png')
-    plt.close()
+    # Update layout
+    fig.update_layout(title=f'{window_size}-Day Moving Average Ratings Over Time',
+                      xaxis_title='Date',
+                      yaxis_title=f'{window_size}-Day Moving Average Rating',
+                      xaxis_tickangle=-45)
+
+    # Save the plot as an HTML file
+    plot_html = f"static/ratings_plot_{random.randint(0, 100000)}.html"
+    fig.write_html(plot_html)
 
     # Render the template with the plot
-    return render_template('index.html', plot_img='ratings_plot.png')
+    return render_template('index.html', plot_html=plot_html)
 
 if __name__ == '__main__':
     app.run(debug=True)
