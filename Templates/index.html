@@ -7,6 +7,27 @@
 </head>
 <body>
     <h1>Ratings Plot</h1>
-    <img src="{{ url_for('static', filename='ratings_plot.png') }}" alt="Ratings Plot">
+    
+    <!-- Form to input parameters -->
+    <form action="/generate_plot" method="post">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" required><br><br>
+        
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" required><br><br>
+        
+        <label for="num_reviews">Number of Reviews:</label>
+        <input type="number" id="num_reviews" name="num_reviews" min="1" value="1000" required><br><br>
+        
+        <label for="window_size">Moving Average Window Size:</label>
+        <input type="number" id="window_size" name="window_size" min="1" value="14" required><br><br>
+        
+        <input type="submit" value="Generate Plot">
+    </form>
+    
+    <!-- Display the generated plot -->
+    {% if plot_img %}
+        <img src="{{ url_for('static', filename=plot_img) }}" alt="Ratings Plot">
+    {% endif %}
 </body>
 </html>
