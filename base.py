@@ -1,32 +1,30 @@
-from flask import Flask, render_template, request
-import random
-import datetime
+from flask import Flask, render_template
 import pandas as pd
 import plotly.graph_objs as go
 import numpy as np
+import random
+import plotly.io as pio
 
 app = Flask(__name__)
 
-# Function to generate a random date within a specific range
-def random_date(start_date, end_date):
-    delta = end_date - start_date
-    random_days = random.randint(0, delta.days)
-    return start_date + datetime.timedelta(days=random_days)
-
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Read product details from a DataFrame or any other data source
+    product_details = pd.read_excel('.\\scrapping\\product_details.xlsx').to_dict(orient='records')
+    # Get the 'Features' from the first record
+    features_string = product_details[0]['Features']
 
-@app.route('/generate_plot', methods=['POST'])
-def generate_plot():
+    # Split the 'Features' string into a list
+    features_list = features_string.split(', ')
 
-    product_details = pd.read_excel('\.scrapping\product_details.xlsx')
-    
+    print(features_list)
     # Convert reviews to DataFrame
-    review_df = pd.read_excel(".\scrapping\amazon_reviews.xlsx")
-    window_size = 30
+    review_df = pd.read_excel(".\\scrapping\\amazon_reviews.xlsx")
+    window_size = 120
     review_df['date'] = pd.to_datetime(review_df['date'])
     review_df.set_index('date', inplace=True)
+
+
     
     # Sort DataFrame by date index
     review_df.sort_index(inplace=True)
@@ -35,10 +33,24 @@ def generate_plot():
     ratings_2_weeks_ma = review_df['rating'].rolling(window=f'{window_size}D').mean()
 
     review_df['sentiment'] = np.random.randint(2, size=len(review_df))
+    review_df['feature'] = np.random.choice(features_list,size=len(review_df))
+
+    Default_pros_cons = {}
+    Default_pros_cons['Pros'] = "Default pros1"
+    Default_pros_cons['Cons'] = "Default Cons1"
+
+    pros_dict = {}
+    cons_dict = {}
+
+    for feature in features_list:
+        pros_dict[feature] = f"{feature} pros"
+        cons_dict[feature] = f"{feature} cons"
+
+    # review_df.to_csv('check.csv')
 
     # Calculate 1-month rolling sum of positive sentiment (1) and total sentiment
-    sentiment_1_month_sum = review_df['sentiment'].rolling(window='30D').sum()
-    total_sentiment_1_month = review_df['sentiment'].rolling(window='30D').count()
+    sentiment_1_month_sum = review_df['sentiment'].rolling(window='120D').sum()
+    total_sentiment_1_month = review_df['sentiment'].rolling(window='120D').count()
 
     # Resample sentiment_1_month_sum to the end of each month and take the last value
     last_sentiment_monthly_sum = sentiment_1_month_sum.resample('M').last()
@@ -65,12 +77,16 @@ def generate_plot():
                       yaxis_title=f'{window_size}-Day Moving Average Rating',
                       xaxis_tickangle=-45)
 
+
+    # # Convert Plotly figure to HTML content
+    # plot_html = pio.to_html(fig, include_plotlyjs=True, full_html=False)
+
     # Save the plot as an HTML file
-    plot_html = f"static/ratings_plot_{random.randint(0, 100000)}.html"
+    plot_html = f"static/ratings_plot.html"
     fig.write_html(plot_html)
 
-    # Render the template with the plot
-    return render_template('index.html', plot_html=plot_html)
+    # Render the template with product details and plot HTML
+    return render_template('index copy.html', products=product_details, plot_html=plot_html,features_list1=features_list,pros= pros_dict, cons= cons_dict,dft = Default_pros_cons)
 
 if __name__ == '__main__':
     app.run(debug=True)
