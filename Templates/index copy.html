@@ -84,6 +84,20 @@
         .default-pros-cons td.cons {
             border-left: none; /* Remove left border for cons column */
         }
+
+
+        .wordcloud-container {
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            margin-top: 20px; /* Add some top margin for spacing */
+        }
+
+        /* Adjustments for the wordcloud image */
+        .wordcloud-image {
+            width: 500px; /* Adjust width as needed */
+            height: auto; /* Maintain aspect ratio */
+        }
     </style>
 </head>
 <body>
@@ -150,6 +164,12 @@
         </div>
     </div>
     {% endfor %}
+
+    <!-- Display wordcloud image -->
+    <div class="wordcloud-container">
+        <!-- <h1 style="text-align: center;">Word Cloud</h1> -->
+        <img src="{{ wordcloud_image_path }}" alt="Wordcloud" class="wordcloud-image">
+    </div>
 
     <!-- Display the rating plot -->
     <div class="rating-plot">

@@ -4,6 +4,7 @@ import plotly.graph_objs as go
 import numpy as np
 import random
 import plotly.io as pio
+from word_cloud import generate_word_cloud
 
 app = Flask(__name__)
 
@@ -34,6 +35,8 @@ def index():
 
     review_df['sentiment'] = np.random.randint(2, size=len(review_df))
     review_df['feature'] = np.random.choice(features_list,size=len(review_df))
+
+    review_df.to_csv('check.csv')
 
     Default_pros_cons = {}
     Default_pros_cons['Pros'] = "Default pros1"
@@ -85,8 +88,11 @@ def index():
     plot_html = f"static/ratings_plot.html"
     fig.write_html(plot_html)
 
+    # Generate word cloud
+    wordcloud_image_path = generate_word_cloud(review_df)
+
     # Render the template with product details and plot HTML
-    return render_template('index copy.html', products=product_details, plot_html=plot_html,features_list1=features_list,pros= pros_dict, cons= cons_dict,dft = Default_pros_cons)
+    return render_template('index copy.html', products=product_details, plot_html=plot_html,features_list1=features_list,pros= pros_dict, cons= cons_dict,dft = Default_pros_cons , wordcloud_image_path=wordcloud_image_path)
 
 if __name__ == '__main__':
     app.run(debug=True)
