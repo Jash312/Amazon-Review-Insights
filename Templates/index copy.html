@@ -8,30 +8,67 @@
     <style>
         .container {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
+            align-items: flex-start; /* Align items to the top */
+            margin-top: 20px;
             margin-bottom: 20px;
+            background-color: #f0f7ff; /* Light blue background color */
+            border-radius: 10px; /* Rounded corners */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow */
         }
-        .details {
-            flex: 1;
-            margin-left: 25px;
-        }
+
+
         .image {
-            width: 100px; /* Set the width of the image */
+            width: 25px; /* Set the width of the image */
             height: auto; /* Maintain aspect ratio */
+            border-radius: 10px; /* Rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow */
         }
+
+        .details {
+            margin-left: 450px;
+            flex: 1;
+            padding: 20px; /* Add padding for content */
+        }
+
         .feature-buttons {
+            margin-left: 200px;
             margin-top: 10px;
         }
+
         .feature-button {
             margin-right: 10px;
+            background-color: #4e7cff; /* Blue button background color */
+            color: #ffffff; /* White text color */
+            border: none;
+            border-radius: 20px; /* Rounded corners */
+            padding: 8px 16px; /* Padding */
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow */
         }
+
+        .feature-button:hover {
+            background-color: #3366ff; /* Darker blue on hover */
+        }
+
         .rating-plot {
             margin-top: 20px;
+            background-color: #f0f7ff; /* Light blue background color */
+            border-radius: 10px; /* Rounded corners */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow */
+
+
         }
+        
+        .wordcloud-container {
+            margin-top: 20px; /* Add top margin for spacing */
+        }
+        .default-pros-cons-container,
         .pros-cons-container {
-            margin-top: 20px;
+            margin-top:20px;
+            
+
         }
+
         .pros-cons {
             display: none; /* Initially hide pros and cons */
         }
@@ -40,40 +77,45 @@
         .pros-cons-table {
             border-collapse: collapse;
             width: 100%;
+            border-radius: 10px; /* Rounded corners */
+            overflow: hidden; /* Hide overflow content */
         }
 
-        .pros-cons-table th, .pros-cons-table td {
+        .pros-cons-table th,
+        .pros-cons-table td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
 
         .pros-cons-table th {
-            background-color: #f2f2f2;
+            background-color: #c7dbff; /* Light blue header background color */
         }
 
         .pros-cons-table tr:nth-child(even) {
-            background-color: #f2f2f2;
+            background-color: #eaf3ff; /* Light blue alternate row color */
         }
 
         .pros-cons-table tr:hover {
-            background-color: #ddd;
+            background-color: #d6e5ff; /* Darker blue on hover */
         }
 
-
-         /* Styles for default pros and cons */
+        /* Styles for default pros and cons */
         .default-pros-cons {
             border-collapse: collapse;
             width: 100%;
+            border-radius: 10px; /* Rounded corners */
+            overflow: hidden; /* Hide overflow content */
         }
-        
-        .default-pros-cons th, .default-pros-cons td {
+
+        .default-pros-cons th,
+        .default-pros-cons td {
             border: 1px solid #ddd;
             padding: 8px;
         }
 
         .default-pros-cons th {
-            background-color: #f2f2f2;
+            background-color: #c7dbff; /* Light blue header background color */
             text-align: center;
         }
 
@@ -85,19 +127,24 @@
             border-left: none; /* Remove left border for cons column */
         }
 
-
+        /* Wordcloud container */
         .wordcloud-container {
-            display: flex;
-            justify-content: center; /* Center horizontally */
-            align-items: center; /* Center vertically */
-            margin-top: 20px; /* Add some top margin for spacing */
+            text-align: center; /* Center horizontally */
+            margin-top: 20px; /* Add top margin for spacing */
+            padding: 20px; /* Add padding for content */
+            background-color: #f0f7ff; /* Light blue background color */
+            border-radius: 10px; /* Rounded corners */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow */
         }
 
         /* Adjustments for the wordcloud image */
         .wordcloud-image {
-            width: 500px; /* Adjust width as needed */
+            max-width: 100%; /* Ensure the image fits within its container */
             height: auto; /* Maintain aspect ratio */
+            border-radius: 10px; /* Rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow */
         }
+
     </style>
 </head>
 <body>
@@ -105,71 +152,77 @@
     {% for product in products %}
     <div class="container">
         <!-- Display image on the left side -->
-        <!-- <div class="image">
+        <div class="image">
             <img src="{{ product['Image URL'] }}" alt="{{ product['Title'] }}">
-        </div> -->
+        </div>
         <!-- Display other details on the right side -->
         <div class="details">
             <h1>{{ product['Title'] }}</h1>
             <p><strong>Rating:</strong> {{ product['Rating'] }}</p>
             <p><strong>Price:</strong> {{ product['Price'] }}</p>
             <p><strong>Description:</strong> {{ product['Description'] }}</p>
-            <p><strong>Features:</strong></p>
+            
             <!-- Split the Features field by commas and iterate over the resulting list -->
-            <div class="feature-buttons">
-                {% for feature in product['Features'].split(', ') %}
-                <!-- Use the same feature value as the button name -->
-                <button class="feature-button" name="{{ feature }}">{{ feature }}</button>
-                {% endfor %}
-            </div>
+            
+        </div>
+    </div>
+    
 
-            <div class="default-pros-cons-container">
-                <!-- Display default pros and cons for each feature -->
-                <table class="default-pros-cons" id="{{ feature }}-default-pros-cons">
-                    <h3>Default Pros and Cons</h3>
+    <div class="container">
+        <div class="feature-buttons">
+            <p><strong>Features:</strong></p>
+            {% for feature in product['Features'].split(', ') %}
+            <!-- Use the same feature value as the button name -->
+            <button class="feature-button" name="{{ feature }}">{{ feature }}</button>
+            {% endfor %}
+        </div>
+    
+        <div class="default-pros-cons-container">
+            <!-- Display default pros and cons for each feature -->
+            <table class="default-pros-cons" id="{{ feature }}-default-pros-cons">
+                <h3>Default Pros and Cons</h3>
+                <tr>
+                    <th>Pros</th>
+                    <th>Cons</th>
+                </tr>
+                <tr>
+                    <td>
+                        <p>{{ dft['Pros'] }}</p>
+                    </td>
+                    <td>
+                        <p>{{ dft['Cons'] }}</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    
+        <div class="pros-cons-container">
+            <!-- Display pros and cons dynamically based on button clicks -->
+            {% for feature in features_list1 %}
+            <div class="pros-cons" id="{{ feature }}-pros-cons">
+                <h2>{{ feature }}</h2>
+                <table class="pros-cons-table">
                     <tr>
                         <th>Pros</th>
                         <th>Cons</th>
                     </tr>
                     <tr>
-                        <td>
-                            <p>{{ dft['Pros'] }}</p>
-                        </td>
-                        <td>
-                            <p>{{ dft['Cons'] }}</p>
-                        </td>
+                        <td>{{ pros[feature] }}</td>
+                        <td>{{ cons[feature] }}</td>
                     </tr>
                 </table>
             </div>
-
-            <div class="pros-cons-container">
-                <!-- Display pros and cons dynamically based on button clicks -->
-                {% for feature in features_list1 %}
-                <div class="pros-cons" id="{{ feature }}-pros-cons">
-                    <h2>{{ feature }}</h2>
-                    <table class="pros-cons-table">
-                        <tr>
-                            <th>Pros</th>
-                            <th>Cons</th>
-                        </tr>
-                        <tr>
-                            <td>{{ pros[feature] }}</td>
-                            <td>{{ cons[feature] }}</td>
-                        </tr>
-                    </table>
-                </div>
-                {% endfor %}
-            </div>
-
+            {% endfor %}
         </div>
     </div>
+    
     {% endfor %}
-
     <!-- Display wordcloud image -->
     <div class="wordcloud-container">
         <!-- <h1 style="text-align: center;">Word Cloud</h1> -->
         <img src="{{ wordcloud_image_path }}" alt="Wordcloud" class="wordcloud-image">
     </div>
+
 
     <!-- Display the rating plot -->
     <div class="rating-plot">
