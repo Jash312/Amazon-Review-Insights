@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ratings Plot</title>
-    <!-- Include Plotly.js -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>Amazon Review Scraper</title>
 </head>
 <body>
-    <h1>Ratings Plot</h1>
-    <!-- Display the generated plot -->
-    {% if plot_html %}
-    <iframe src="{{ plot_html }}" width="100%" height="600px"></iframe>
-    {% endif %}
+    <h1>Amazon Review Scraper</h1>
+    <form method="post">
+        <label for="product_url">Enter Amazon URL:</label><br>
+        <input type="text" id="product_url" name="product_url"><br>
+        <input type="submit" value="Submit">
+    </form>
 </body>
 </html>
