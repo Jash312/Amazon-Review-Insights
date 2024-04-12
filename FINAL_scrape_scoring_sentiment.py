@@ -21,6 +21,8 @@ def initialize_classifier(model_name):
                           tokenizer=tokenizer)
     return classifier
 
+
+
 def get_scraping_link(url):
     match = re.search(r'(https://www.amazon.com/.+?/dp/[\w-]+)', url)
     if match:
@@ -101,12 +103,11 @@ def get_reviews(soup,  candidate_labels, classifier, sentiment_model, product_ur
 
             review_text_elem = item.find('span', {'data-hook': 'review-body'})
             review_text = review_text_elem.text.strip() if review_text_elem  else ""
-
+           
+            sentiment = 1
             sentiment_result = sentiment_model(review_text)[0]['label']
             if sentiment_result == 'positive':
                 sentiment = 1
-            #elif sentiment_result == 'neutral':
-            #   sentiment = 0
             elif sentiment_result == 'negative':
                 sentiment = 0
             
@@ -123,7 +124,7 @@ def get_reviews(soup,  candidate_labels, classifier, sentiment_model, product_ur
                 else:
                     break
             labels = labels[:a+1]
-            scores = [str(x) for x in scores]
+            # scores = [str(x) for x in scores]
             review = {
                 'title': title,
                 'rating': rating,
@@ -193,14 +194,22 @@ if __name__ == '__main__':
 
     #Initializing the sentiment model
     model_name = 'cardiffnlp/twitter-roberta-base-sentiment-latest'
-    sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name)
+    sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name, max_length=514, truncation=True)
+    # sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name)
     
     product_url = input('Enter the Amazon URL: ')
     
     excel_file_product_details = 'product_details.xlsx'
     excel_file_reviews = 'amazon_reviews.xlsx'
 
+    
     product_details = get_product_details(product_url, excel_file_product_details)
+    while product_details["Features"] == [""]:
+        product_details = get_product_details(product_url, excel_file_product_details)
+        
+    candidate_labels = product_details["Features"]
+
+    
     modified_url = get_scraping_link(product_url)
 
     if modified_url:
@@ -208,12 +217,13 @@ if __name__ == '__main__':
     else:
         print('Invalid URL or pattern not found.')
 
-    star_ratings = ['one', 'two', 'three', 'four', 'five']
-    #star_ratings = ['one']
+    #star_ratings = ['one', 'two', 'three', 'four', 'five']
+    star_ratings = ['four','five']
     
     candidate_labels = product_details["Features"]
     candidate_labels = candidate_labels[0].replace(" ", "").split(",")
     all_reviews = scrape_amazon_reviews(modified_url, star_ratings, candidate_labels, classifier, sentiment_model)
+
     
     df = pd.DataFrame(all_reviews)
     df.to_excel(excel_file_reviews, index=False)
