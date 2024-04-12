@@ -19,8 +19,8 @@ def scrape_amazon_and_save_to_excel(product_url):
     sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name)
 
     # Scraping and processing Amazon reviews
-    excel_file_product_details = 'product_details.xlsx'
-    excel_file_reviews = 'amazon_reviews.xlsx'
+    excel_file_product_details = '.\\scrapping\\product_details.xlsx'
+    excel_file_reviews = '.\\scrapping\\amazon_reviews.xlsx'
 
     product_details = get_product_details(product_url, excel_file_product_details)
     modified_url = get_scraping_link(product_url)

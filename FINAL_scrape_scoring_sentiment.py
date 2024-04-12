@@ -105,10 +105,11 @@ def get_reviews(soup,  candidate_labels, classifier, sentiment_model, product_ur
             sentiment_result = sentiment_model(review_text)[0]['label']
             if sentiment_result == 'positive':
                 sentiment = 1
-            elif sentiment_result == 'neutral':
-                sentiment = 0
+            # elif sentiment_result == 'neutral':
+            #     sentiment = 0
             elif sentiment_result == 'negative':
-                sentiment = -1
+                # sentiment = -1
+                sentiment = 0
             
             result = classifier(review_text,candidate_labels) #Getting scores for each feature
             labels = result['labels']
@@ -180,6 +181,8 @@ def insert_product_info_to_mongodb(product_url, product_details, all_reviews):
     result = collection.insert_one(product_info)
     print("Document inserted successfully with ID:", result.inserted_id)
     print(product_details)
+
+    return result.inserted_id
 
 
 

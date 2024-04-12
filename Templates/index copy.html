@@ -149,18 +149,17 @@
 </head>
 <body>
     <!-- Iterate over each product and display its details -->
-    {% for product in products %}
     <div class="container">
         <!-- Display image on the left side -->
         <div class="image">
-            <img src="{{ product['Image URL'] }}" alt="{{ product['Title'] }}">
+            <img src="{{ products['Image_URL'] }}" alt="{{ products['Title'] }}">
         </div>
         <!-- Display other details on the right side -->
         <div class="details">
-            <h1>{{ product['Title'] }}</h1>
-            <p><strong>Rating:</strong> {{ product['Rating'] }}</p>
-            <p><strong>Price:</strong> {{ product['Price'] }}</p>
-            <p><strong>Description:</strong> {{ product['Description'] }}</p>
+            <h1>{{ products['Title'] }}</h1>
+            <p><strong>Rating:</strong> {{ products['Overall_Rating'] }}</p>
+            <p><strong>Price:</strong> {{ products['Final_Price'] }}</p>
+            <p><strong>Description:</strong> {{ products['Description'] }}</p>
             
             <!-- Split the Features field by commas and iterate over the resulting list -->
             
@@ -171,7 +170,7 @@
     <div class="container">
         <div class="feature-buttons">
             <p><strong>Features:</strong></p>
-            {% for feature in product['Features'].split(', ') %}
+            {% for feature in features_list1 %}
             <!-- Use the same feature value as the button name -->
             <button class="feature-button" name="{{ feature }}">{{ feature }}</button>
             {% endfor %}
@@ -216,18 +215,19 @@
         </div>
     </div>
     
-    {% endfor %}
+
+
     <!-- Display wordcloud image -->
     <div class="wordcloud-container">
         <!-- <h1 style="text-align: center;">Word Cloud</h1> -->
-        <img src="{{ wordcloud_image_path }}" alt="Wordcloud" class="wordcloud-image">
+        <img src="{{ url_for('static', filename='wordcloud.png') }}" alt="Wordcloud" class="wordcloud-image">
     </div>
 
 
     <!-- Display the rating plot -->
     <div class="rating-plot">
         <h1>Ratings Plot</h1>
-        <iframe src="{{ plot_html }}" width="100%" height="600px"></iframe>
+        <iframe src="{{ url_for('static', filename='ratings_plot.html') }}" width="100%" height="600px"></iframe>
     </div>
 
 
