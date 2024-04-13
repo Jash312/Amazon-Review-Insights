@@ -95,18 +95,20 @@ def get_reviews(soup,  candidate_labels, classifier, sentiment_model, product_ur
             
             rating_elem = item.find('i', {'data-hook': 'review-star-rating'})
             rating = float(rating_elem.text.replace('out of 5 stars', '').strip()) if rating_elem else ""
-
+    
             
             date_text_elem = item.find('span', {'data-hook': 'review-date'})
             date_text = date_text_elem.text.strip().split("on")[-1].strip() if date_text_elem else ""
             date = datetime.strptime(date_text, "%B %d, %Y").strftime("%d %B %Y") if date_text else ""
-
+    
             review_text_elem = item.find('span', {'data-hook': 'review-body'})
             review_text = review_text_elem.text.strip() if review_text_elem  else ""
-           
-            sentiment = 1
+
+            sentiment = ""
             sentiment_result = sentiment_model(review_text)[0]['label']
             if sentiment_result == 'positive':
+                sentiment = 1
+            elif sentiment_result == 'neutral':
                 sentiment = 1
             elif sentiment_result == 'negative':
                 sentiment = 0
@@ -116,7 +118,7 @@ def get_reviews(soup,  candidate_labels, classifier, sentiment_model, product_ur
             scores = result['scores']
     
             num_feats = len(scores)
-
+    
             a = 0
             for i in range(num_feats - 1):
                 if scores[i+1] / scores[i] >= 0.75:
@@ -194,7 +196,7 @@ if __name__ == '__main__':
 
     #Initializing the sentiment model
     model_name = 'cardiffnlp/twitter-roberta-base-sentiment-latest'
-    sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name, max_length=514, truncation=True)
+    sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name, max_length=512, truncation=True)
     # sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name)
     
     product_url = input('Enter the Amazon URL: ')
@@ -217,8 +219,8 @@ if __name__ == '__main__':
     else:
         print('Invalid URL or pattern not found.')
 
-    #star_ratings = ['one', 'two', 'three', 'four', 'five']
-    star_ratings = ['four','five']
+    star_ratings = ['one', 'two', 'three', 'four', 'five']
+    # star_ratings = ['four']
     
     candidate_labels = product_details["Features"]
     candidate_labels = candidate_labels[0].replace(" ", "").split(",")
