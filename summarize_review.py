@@ -5,6 +5,8 @@ from functools import lru_cache
 from langchain_core.language_models import BaseLLM
 import os
 import json
+import sys
+import asyncio
 from langchain_openai import ChatOpenAI
 from langchain_community.llms import Ollama
 from langchain.chains.summarize import load_summarize_chain
@@ -15,7 +17,7 @@ from langchain_text_splitters import CharacterTextSplitter
 from langchain.docstore.document import Document
 from tqdm import tqdm
 from langchain.chains import MapReduceDocumentsChain, ReduceDocumentsChain, StuffDocumentsChain
-
+import time
 
 mongo_uri = "mongodb+srv://Admin:Admin1234@cluster0.lhuhlns.mongodb.net"
 
@@ -114,6 +116,40 @@ def summarize_by_feature_refine(llm, product, feature, reviews):
     result = chain({"feature": feature, "product": product, "input_documents": reviews, "formatting_instructions":formatting_instructions}, return_only_outputs=True)
     return result["output_text"]
 
+async def summarize_by_feature_refine_async(llm, product, feature, reviews):
+    formatting_instructions = "{\"pros\": [\"Pros of the feature\"], \"cons\": [\"Cons of the feature\"] }"
+    prompt_template = """Summarize the feature of {product} only in terms of {feature} using the below reviews:
+    Reviews are in the format "title: review"
+    {text}
+    CONCISE SUMMARY:"""
+    prompt = PromptTemplate.from_template(prompt_template)
+
+    refine_template = (
+        "Your job is to produce a final good and bad points\n"
+        "We have provided an existing summary of product reviews up to a certain point: {existing_answer}\n"
+        "We have the opportunity to extract the good and bad points about the product only in terms of {feature}"
+        "(only if needed) with some more context below.\n"
+        "------------\n"
+        "{text}\n"
+        "------------\n"
+        "Given the new context, refine the original good and bad points only in terms of {feature} in English"
+        "If the context isn't useful, return the original good and bad points."
+        "Formatting Instructions: {formatting_instructions}"
+        "Output MUST be a JSON and should ADHERE TO FORMATTING INSTRUCTIONS."
+    )
+    refine_prompt = PromptTemplate.from_template(refine_template)
+    chain = load_summarize_chain(
+        llm=llm,
+        chain_type="refine",
+        question_prompt=prompt,
+        refine_prompt=refine_prompt,
+        return_intermediate_steps=True,
+        input_key="input_documents",
+        output_key="output_text",
+    )
+    result = chain({"feature": feature, "product": product, "input_documents": reviews, "formatting_instructions":formatting_instructions}, return_only_outputs=True)
+    return {feature: result["output_text"]}
+
 
 def summarize_by_feature_map_reduce(llm, product, feature, reviews):
 
@@ -172,16 +208,6 @@ def summarize_by_feature_map_reduce(llm, product, feature, reviews):
     return result["output_text"]
 
 
-def update_summary(review_object_id, feature_summary):
-    collection = get_db["Feature_Summary"]
-    feature_data = {
-        "review_id": review_object_id,
-        "feature_summary": feature_summary
-    }
-    
-    return collection.insert_one(feature_data)
-
-        
 def summarize(object_id, is_prod, openai_key):
     product_details, reviews = get_reviews(object_id)
     grouped_reviews_by_feature = group_by_features(reviews)
@@ -205,6 +231,42 @@ def summarize(object_id, is_prod, openai_key):
         
     return summary_dict
 
+async def summarize_async(object_id, is_prod, openai_key):
+    product_details, reviews = get_reviews(object_id)
+    grouped_reviews_by_feature = group_by_features(reviews)
+    
+    if is_prod:
+        openai_config["api_key"] = openai_key
+        llm = get_model(is_prod, openai_config)
+    else:  
+        llm = get_model(is_prod, olama_config)
+
+    tasks = []
+    for _, row in grouped_reviews_by_feature.iterrows():
+        
+        feature = row["features"]
+        
+        print("Processing - ", feature)
+        
+        chunked_reviews = split_text(row["concatenated"], count=1000)
+        tasks.append(summarize_by_feature_refine_async(llm, product_details["Title"], feature, chunked_reviews))
+        
+    results = await asyncio.gather(*tasks)
+    
+    print(results)
+    
+    summary_dict = {}
+    
+    for feature_dict in results:
+        
+        item = list(feature_dict.items())[0]
+        
+        feature = item[0]
+        summary = item[1]
+        summary_dict[feature] = summary
+        
+    return summary_dict
+
 
 def update_summary(review_object_id, feature_summary):
     collection = get_db(mongo_uri)["Feature_Summary"]
@@ -214,11 +276,17 @@ def update_summary(review_object_id, feature_summary):
     }
     
     result = collection.insert_one(feature_data)
-    return str(res.inserted_id)
+    return str(result.inserted_id)
 
 
 def main(review_id, is_prod, openai_key):
-    summaries = summarize(review_id, is_prod, openai_key)
+    
+    start_time = time.time_ns()
+    summaries = asyncio.run(summarize_async(review_id, is_prod, openai_key))
+    end_time = time.time_ns()
+    
+    print("Summary Processing Time - ", end_time - start_time)
+
     update_summary(review_id, summaries)
 
     
