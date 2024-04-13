@@ -184,6 +184,8 @@ def insert_product_info_to_mongodb(product_url, product_details, all_reviews):
     print("Document inserted successfully with ID:", result.inserted_id)
     print(product_details)
 
+    return result.inserted_id
+
 
 
 if __name__ == '__main__':
@@ -225,7 +227,6 @@ if __name__ == '__main__':
     candidate_labels = product_details["Features"]
     candidate_labels = candidate_labels[0].replace(" ", "").split(",")
     all_reviews = scrape_amazon_reviews(modified_url, star_ratings, candidate_labels, classifier, sentiment_model)
-
     
     df = pd.DataFrame(all_reviews)
     df.to_excel(excel_file_reviews, index=False)
