@@ -7,36 +7,59 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<style>
+    .btn.active {
+    background-color: #343a40 !important; /* Darker color */
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); /* Shadow effect */
+    transform: scale(1.1); /* Increase size */
+}
+</style>
 <body>
     <!-- Iterate over each product and display its details -->
-    <div class="container">
-        <!-- Display image on the left side -->
-        <div class="row">
-            <div class="col-md-2">
-                <img src="{{ products['Image_URL'] }}" alt="{{ products['Title'] }}" height="400" width="300" class="rounded float-left img-thumbnail">
-            </div>
-            <!-- Display other details on the right side -->
-            <div class="col-md-8">
-                <h1>{{ products['Title'] }}</h1>
-                <p><strong>Rating:</strong> {{ products['Overall_Rating'] }}</p>
-                <p><strong>Price:</strong> {{ products['Final_Price'] }}</p>
-                <p><strong>Description:</strong> {{ products['Description'] }}</p>
-            </div>
-
-                <!-- Display wordcloud image -->
-            <div class="col-md-6">
-                <img src="{{ url_for('static', filename='wordcloud.png') }}" alt="Wordcloud" class="img-fluid rounded">
+    <div class="container-fluid bg-info text-white py-5 shadow">
+        <div class="container">
+            <!-- Display image and details -->
+            <div class="row align-items-center">
+                <div class="col-md-12 text-center mb-2">
+                    <h1 class="display-6 fw-bold" style="background-color: rgba(0,0,0,0.5); padding: 10px;">Amazon Review Insights</h1>
+                </div>
+                <!-- Image on the left -->
+                <div class="col-md-4">
+                    <img src="{{ products['Image_URL'] }}" alt="{{ products['Title'] }}" class="rounded img-fluid shadow-lg border border-secondary">
+                </div>                
+                <!-- Details on the right -->
+                <div class="col-md-8">
+                    <h3>{{ products['Title'] }}</h3>
+                    <p class="mb-3"><strong>Rating:</strong> {{ products['Overall_Rating'] }}</p>
+                    <p class="mb-3"><strong>Price:</strong> {{ products['Final_Price'] }}</p>
+                    <p class="mb-3"><strong>Description:</strong> {{ products['Description'] }}</p>
+                </div>
             </div>
         </div>
     </div>
+
+    
+
+
 
     <div class="container mt-4">
         <div class="row">
             <div class="col-md-12">
                 <div class="d-flex flex-wrap">
+                    <!-- Action Items button -->
+                    <div class="col-md-auto me-auto"> <!-- Aligns to the left -->
+                        <div class="action-items">
+                            <button id="actionItemsBtn" class="btn btn-primary me-2 mb-2">Action Items</button>
+                        </div>
+                        <div class="action_items1" id="action_items1" style="display: none;">
+                            <p><strong>{{ dft['Action Items'] }} </strong></p>
+                        </div>
+
+
+                    </div>
+                    
                     <!-- Display feature buttons -->
                     <div class="feature-buttons">
-                        <p><strong>Features:</strong></p>
                         {% for feature in features_list1 %}
                         <!-- Use the same feature value as the button name -->
                         <button class="btn btn-primary me-2 mb-2" name="{{ feature }}">{{ feature }}</button>
@@ -46,7 +69,7 @@
                     <!-- Display pros and cons dynamically based on button clicks -->
                     <div class="pros-cons-container">
                         {% for feature in features_list1 %}
-                        <div class="pros-cons" id="{{ feature }}-pros-cons">
+                        <div class="pros-cons" id="{{ feature }}-pros-cons" style="display: none;"> <!-- Hide by default -->
                             <table class="table">
                                 <thead>
                                     <tr>
@@ -81,42 +104,93 @@
         </div>
     </div>
 
-
-
-    <!-- Display the rating plot -->
     <div class="container mt-4">
         <div class="row">
-            <div class="col-md-12">
-                <h1>Ratings Plot</h1>
-                <iframe src="{{ url_for('static', filename='ratings_plot.html') }}" width="100%" height="600px"></iframe>
+            <!-- Word cloud -->
+            <div class="col-md-4 d-flex justify-content-center align-items-center">
+                <div class="d-flex flex-column justify-content-center align-items-center" style="height: 100%;">
+                    <img src="{{ url_for('static', filename='wordcloud.png') }}" alt="Wordcloud" class="rounded img-fluid shadow-lg border-secondary" style="max-width: 100%; max-height: 100%;">
+                </div>
+            </div>
+            <div class="col-md-8">
+                <!-- Ratings plot -->
+                <div class="text-center">
+                    <h3>Ratings/Sentiment over time</h3>
+                    <div class="d-flex justify-content-end mb-0 mt-0">
+                        <ul class="list-unstyled text-end mb-0 mt-0">
+                            <li>Red - Negative Sentiment</li>
+                            <li>Yellow - Neutral Sentiment</li>
+                            <li>Green - Positive Sentiment</li>
+                        </ul>
+                    </div>
+                    <iframe src="{{ url_for('static', filename='ratings_plot.html') }}" style="width: 100%; height: 600px;"></iframe>
+                </div>
             </div>
         </div>
     </div>
+
+
+
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        // Function to handle button click
+        function handleButtonClick(button) {
+            // Toggle active class for the clicked button
+            button.classList.toggle('active');
+    
+            // Remove active class from other buttons
+            var featureButtons = document.querySelectorAll('.btn');
+            featureButtons.forEach(function(btn) {
+                if (btn !== button) {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+    
         // Get all feature buttons
         var featureButtons = document.querySelectorAll('.btn');
-
+    
         // Iterate over feature buttons and add click event listener
         featureButtons.forEach(function(button) {
             button.addEventListener('click', function() {
+                // Call function to handle button click
+                handleButtonClick(button);
+    
                 // Get the name of the clicked feature
                 var featureName = button.getAttribute('name');
-
+    
                 // Hide all pros and cons containers
                 var allProsCons = document.querySelectorAll('.pros-cons');
+                var actionItemsDiv = document.getElementById('action_items1');
                 allProsCons.forEach(function(prosCons) {
+                    actionItemsDiv.style.display = 'none';
                     prosCons.style.display = 'none';
                 });
-
+    
                 // Show pros and cons for the clicked feature
                 var prosConsToShow = document.getElementById(featureName + '-pros-cons');
                 prosConsToShow.style.display = 'block';
             });
         });
+    
+    
+        // Get the action items button and the corresponding div
+        var actionItemsBtn = document.getElementById('actionItemsBtn');
+        var actionItemsDiv = document.getElementById('action_items1');
+    
+        // Add click event listener to the action items button
+        actionItemsBtn.addEventListener('click', function() {
+            // Toggle the display of the action items div
+            if (actionItemsDiv.style.display === 'none') {
+                actionItemsDiv.style.display = 'block';
+            } else {
+                actionItemsDiv.style.display = 'none';
+            }
+        });
     </script>
+    
 </body>
 </html>

@@ -146,7 +146,7 @@ def display(product_id):
     Default_pros_cons = {}
     Default_pros_cons['Pros'] = "\n".join(summarized['All_features']['pros'])
     Default_pros_cons['Cons'] = "\n".join(summarized['All_features']['cons'])
-    # Default_pros_cons['Pros'] = 'Default'
+    Default_pros_cons['Action Items'] = 'Default action items'
     # Default_pros_cons['Cons'] = 'Cons'
 
 
@@ -180,26 +180,26 @@ def display(product_id):
         color = 'green' if percent >= 50 else 'yellow' if percent >= 40 else 'red'
         fig.add_shape(type="rect", x0=start_of_month, y0=0, x1=month_end_date, y1=5, fillcolor=color, opacity=0.3)
 
-    # Define legend labels and corresponding colors
-    legend_labels = {
-        'Positive Sentiment ≥ 50%': 'green',
-        'Positive Sentiment ≥ 40%': 'yellow',
-        'Positive Sentiment < 40%': 'red'
-    }
+    # # Define legend labels and corresponding colors
+    # legend_labels = {
+    #     'Positive Sentiment ≥ 50%': 'green',
+    #     'Positive Sentiment ≥ 40%': 'yellow',
+    #     'Positive Sentiment < 40%': 'red'
+    # }
 
-    # Add legend annotations
-    for label, color in legend_labels.items():
-        fig.add_annotation(
-            xref="paper", yref="paper",
-            x=1.02, y=1,
-            text=label,
-            showarrow=False,
-            bgcolor=color,
-            bordercolor=color,
-            borderwidth=1,
-            borderpad=4,
-            font=dict(color="black")
-        )
+    # # Add legend annotations
+    # for label, color in legend_labels.items():
+    #     fig.add_annotation(
+    #         xref="paper", yref="paper",
+    #         x=1.02, y=1,
+    #         text=label,
+    #         showarrow=False,
+    #         bgcolor=color,
+    #         bordercolor=color,
+    #         borderwidth=1,
+    #         borderpad=4,
+    #         font=dict(color="black")
+    #     )
 
     # Update layout
     fig.update_layout(
