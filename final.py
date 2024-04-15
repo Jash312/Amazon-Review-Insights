@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 import pandas as pd
 import time
-from FINAL_scrape_scoring_sentiment import get_product_details, get_scraping_link, scrape_amazon_reviews, initialize_classifier ,insert_product_info_to_mongodb
+from FINAL_scrape_scoring_sentiment import get_Title,get_product_details, get_scraping_link, scrape_amazon_reviews, initialize_classifier ,insert_product_info_to_mongodb
 from transformers import pipeline
 import plotly.graph_objs as go
 import numpy as np
@@ -11,18 +11,36 @@ from word_cloud import generate_word_cloud
 import pymongo
 from bson.objectid import ObjectId
 import summarize_review
+from summarize_review import get_db
 from dotenv import load_dotenv
 import os
 
 # Load environment variables from .env file
 load_dotenv()
-
+mongo_uri = "mongodb+srv://Admin:Admin1234@cluster0.lhuhlns.mongodb.net"
 # Access the API key using os.environ.get()
 api_key = os.environ.get("API_KEY")
 
 app = Flask(__name__)
 
+def check_exist(product_url):
+    Title = get_Title(product_url)
+    db = get_db(mongo_uri)
+
+    # Access the collection
+    collection = db["Amazon_Reviews"]
+    result = collection.find_one({"Product_Details.Title": Title})
+    
+
+    if result:
+        print('Already Existed',str(result.get('_id')))
+        return str(result.get('_id'))
+
 def scrape_amazon_and_save_to_excel(product_url):
+    product_id = check_exist(product_url)
+    if product_id:
+        return product_id
+    
     start_time = time.time()
 
     # Initializing the classifier
@@ -37,6 +55,8 @@ def scrape_amazon_and_save_to_excel(product_url):
     # Scraping and processing Amazon reviews
     excel_file_product_details = '.\\scrapping\\product_details.xlsx'
     excel_file_reviews = '.\\scrapping\\amazon_reviews.xlsx'
+
+
 
     product_details = get_product_details(product_url, excel_file_product_details)
     while product_details["Features"] == [""]:
@@ -81,11 +101,8 @@ def index():
 
 @app.route('/display/<product_id>', methods=['GET'])
 def display(product_id):
-    # Connect to the MongoDB cluster
-    client = pymongo.MongoClient("mongodb+srv://Admin:Admin1234@cluster0.lhuhlns.mongodb.net")
-
     # Access the database
-    db = client["Full_Stack_Project"]
+    db = get_db(mongo_uri)
 
     # Access the collection
     collection = db["Amazon_Reviews"]
@@ -127,15 +144,18 @@ def display(product_id):
     ratings_2_weeks_ma = review_df['rating'].rolling(window=f'{window_size}D').mean()
 
     Default_pros_cons = {}
-    Default_pros_cons['Pros'] = "Default pros1"
-    Default_pros_cons['Cons'] = "Default Cons1"
+    Default_pros_cons['Pros'] = "\n".join(summarized['All_features']['pros'])
+    Default_pros_cons['Cons'] = "\n".join(summarized['All_features']['cons'])
+    # Default_pros_cons['Pros'] = 'Default'
+    # Default_pros_cons['Cons'] = 'Cons'
+
 
     pros_dict = {}
     cons_dict = {}
-
+    
     for feature in features_list:
-        pros_dict[feature] = f"{feature} pros"
-        cons_dict[feature] = f"{feature} cons"
+        pros_dict[feature] = summarized['feature_summary'][feature]['pros']
+        cons_dict[feature] = summarized['feature_summary'][feature]['cons']
 
     # Calculate 1-month rolling sum of positive sentiment (1) and total sentiment
     sentiment_1_month_sum = review_df['sentiment'].rolling(window=f'{window_size}D').sum()
@@ -160,11 +180,35 @@ def display(product_id):
         color = 'green' if percent >= 50 else 'yellow' if percent >= 40 else 'red'
         fig.add_shape(type="rect", x0=start_of_month, y0=0, x1=month_end_date, y1=5, fillcolor=color, opacity=0.3)
 
+    # Define legend labels and corresponding colors
+    legend_labels = {
+        'Positive Sentiment ≥ 50%': 'green',
+        'Positive Sentiment ≥ 40%': 'yellow',
+        'Positive Sentiment < 40%': 'red'
+    }
+
+    # Add legend annotations
+    for label, color in legend_labels.items():
+        fig.add_annotation(
+            xref="paper", yref="paper",
+            x=1.02, y=1,
+            text=label,
+            showarrow=False,
+            bgcolor=color,
+            bordercolor=color,
+            borderwidth=1,
+            borderpad=4,
+            font=dict(color="black")
+        )
+
     # Update layout
-    fig.update_layout(title=f'{window_size}-Day Moving Average Ratings Over Time',
-                      xaxis_title='Date',
-                      yaxis_title=f'{window_size}-Day Moving Average Rating',
-                      xaxis_tickangle=-45)
+    fig.update_layout(
+        title=f'{window_size}-Day Moving Average Ratings Over Time',
+        xaxis_title='Date',
+        yaxis_title=f'{window_size}-Day Moving Average Rating',
+        xaxis_tickangle=-45,
+        showlegend=False  # Set to True if you want to show Plotly's default legend
+    )
 
     # Save the plot as an HTML file
     plot_html1 = f"static/ratings_plot.html"
@@ -174,7 +218,7 @@ def display(product_id):
     wordcloud_image_path1 = generate_word_cloud(review_df)
 
     # Render the template with product details and plot HTML
-    return render_template('index copy.html', products=product_details1, features_list1=features_list, pros=pros_dict, cons=cons_dict, dft=Default_pros_cons)
+    return render_template('index_bootstrap.html', products=product_details1, features_list1=features_list, pros=pros_dict, cons=cons_dict, dft=Default_pros_cons)
 
 if __name__ == '__main__':
     app.run(debug=True)

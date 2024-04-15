@@ -83,6 +83,18 @@ def get_product_details(product_url, excel_file):
 
     return product_details
 
+def get_Title(product_url):
+    r=requests.get(product_url)
+    soup = BeautifulSoup(r.text, 'html.parser')
+    # soup = get_soup(product_url)
+
+    # Title
+    title_elem = soup.select_one('#productTitle')
+    title = title_elem.get_text(strip=True) if title_elem else ""
+
+    return title
+
+
 def get_reviews(soup,  candidate_labels, classifier, sentiment_model, product_url=None, star_rating=None):
     reviewlist = []
     reviews = soup.find_all('div', {'data-hook': 'review'})

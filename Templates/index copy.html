@@ -180,17 +180,17 @@
             <!-- Display default pros and cons for each feature -->
             <table class="default-pros-cons" id="{{ feature }}-default-pros-cons">
                 <h3>Default Pros and Cons</h3>
-                <!-- <tr>
+                <tr>
                     <th>Pros</th>
                     <th>Cons</th>
-                </tr> -->
+                </tr>
                 <tr>
                     <td>
                         <p>{{ dft['Pros'] }}</p>
                     </td>
-                    <!-- <td>
+                    <td>
                         <p>{{ dft['Cons'] }}</p>
-                    </td> -->
+                    </td>
                 </tr>
             </table>
         </div>
@@ -201,13 +201,19 @@
             <div class="pros-cons" id="{{ feature }}-pros-cons">
                 <h2>{{ feature }}</h2>
                 <table class="pros-cons-table">
-                    <!-- <tr>
+                    <tr>
                         <th>Pros</th>
                         <th>Cons</th>
-                    </tr> -->
+                    </tr>
                     <tr>
-                        <td>{{ pros[feature] }}</td>
-                        <!-- <td>{{ cons[feature] }}</td> -->
+                        <td>
+                            <ul>
+                            {% for rev in pros[feature] %}
+                            <li>{{ rev }}</li>
+                            {% endfor %}
+                            </ul>
+                        </td>
+                        <td>{{ cons[feature] }}</td>
                     </tr>
                 </table>
             </div>
