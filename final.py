@@ -10,6 +10,7 @@ import plotly.io as pio
 from word_cloud import generate_word_cloud
 import pymongo
 from bson.objectid import ObjectId
+import summarize_review
 
 app = Flask(__name__)
 
@@ -49,7 +50,7 @@ def scrape_amazon_and_save_to_excel(product_url):
 
         # Insert product info to MongoDB
         product_id = insert_product_info_to_mongodb(product_url, product_details, all_reviews)
-
+        summarize_review.main(product_id,"True",openai_key='')
         end_time = time.time()
         execution_time = end_time - start_time
         print('Execution time:', execution_time, 'seconds')
@@ -89,6 +90,7 @@ def display(product_id):
         # Extract product details (features) and reviews
         product_details1 = document.get('Product_Details', {})
         reviews_data = document.get('Reviews', [])
+        summarized = document.get('Summary',{})
 
     else:
         print("Document not found with the specified ID.")
