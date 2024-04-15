@@ -11,6 +11,14 @@ from word_cloud import generate_word_cloud
 import pymongo
 from bson.objectid import ObjectId
 import summarize_review
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Access the API key using os.environ.get()
+api_key = os.environ.get("API_KEY")
 
 app = Flask(__name__)
 
@@ -50,7 +58,7 @@ def scrape_amazon_and_save_to_excel(product_url):
 
         # Insert product info to MongoDB
         product_id = insert_product_info_to_mongodb(product_url, product_details, all_reviews)
-        summarize_review.main(product_id,"True",openai_key='')
+        summarize_review.main(product_id,"True",openai_key=api_key)
         end_time = time.time()
         execution_time = end_time - start_time
         print('Execution time:', execution_time, 'seconds')
