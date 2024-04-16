@@ -16,7 +16,7 @@
 </style>
 <body>
     <!-- Iterate over each product and display its details -->
-    <div class="container-fluid bg-info text-white py-5 shadow">
+    <div class="container-fluid bg-secondary text-white py-5 shadow">
         <div class="container">
             <!-- Display image and details -->
             <div class="row align-items-center">
@@ -45,63 +45,54 @@
 
 
     <div class="container mt-4">
-        <div class="row">
+        <!-- Row for Action Items -->
+        <div class="row justify-content-center">
             <div class="col-md-12">
-                <div class="d-flex flex-wrap">
-                    <!-- Action Items button -->
-                    <div class="col-md-auto me-auto"> <!-- Aligns to the left -->
-                        <div class="action-items">
-                            <button id="actionItemsBtn" class="btn btn-primary me-2 mb-2">Action Items</button>
-                        </div>
-                        <div class="action_items1" id="action_items1" style="display: none;">
-                            <ul>
-                                {% for rev1 in dft['Action Items'] %}
-                                <li>{{ rev1 }}</li>
-                                {% endfor %}
-                                </ul>
-                        </div>
-
-
-                    </div>
-                    
-                    <!-- Display feature buttons -->
+                <div class="action_items1 p-3" id="action_items1" style="display: block; background-color: rgba(255, 255, 255, 0.8); box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);">
+                    <h4 class="text-center">Action items</h4>
+                    <ul>
+                        {% for rev1 in dft['Action Items'] %}
+                        <li>{{ rev1 }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Row for Feature Buttons and Pros/Cons -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-12">
+                <div class="d-flex flex-wrap justify-content-center">
+                    <!-- Feature Buttons -->
                     <div class="feature-buttons">
                         {% for feature in features_list1 %}
                         <!-- Use the same feature value as the button name -->
-                        <button class="btn btn-primary me-2 mb-2" name="{{ feature }}">{{ feature }}</button>
+                        <button class="btn btn-primary me-2 mb-2 align-items-center" name="{{ feature }}">{{ feature }}</button>
                         {% endfor %}
                     </div>
-                    
-                    <!-- Display pros and cons dynamically based on button clicks -->
+    
+                    <!-- Pros and Cons -->
                     <div class="pros-cons-container">
                         {% for feature in features_list1 %}
                         <div class="pros-cons" id="{{ feature }}-pros-cons" style="display: none;"> <!-- Hide by default -->
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Pros</th>
-                                        <th>Cons</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <ul>
-                                            {% for rev in pros[feature] %}
-                                            <li>{{ rev }}</li>
-                                            {% endfor %}
-                                            </ul>
-                                        </td>
-                                        <td>
-                                            <ul>
-                                            {% for rev1 in cons[feature] %}
-                                            <li>{{ rev1 }}</li>
-                                            {% endfor %}
-                                            </ul>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h4 class="text-center text-success ">Pros</h4>
+                                    <ul>
+                                        {% for rev in pros[feature] %}
+                                        <li>{{ rev }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h4 class="text-center text-danger">Cons</h4>
+                                    <ul>
+                                        {% for rev1 in cons[feature] %}
+                                        <li>{{ rev1 }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                         {% endfor %}
                     </div>
@@ -109,6 +100,7 @@
             </div>
         </div>
     </div>
+    
 
     <div class="container mt-4">
         <div class="row">
@@ -170,9 +162,7 @@
     
                 // Hide all pros and cons containers
                 var allProsCons = document.querySelectorAll('.pros-cons');
-                var actionItemsDiv = document.getElementById('action_items1');
                 allProsCons.forEach(function(prosCons) {
-                    actionItemsDiv.style.display = 'none';
                     prosCons.style.display = 'none';
                 });
     
@@ -182,20 +172,8 @@
             });
         });
     
-    
-        // Get the action items button and the corresponding div
-        var actionItemsBtn = document.getElementById('actionItemsBtn');
-        var actionItemsDiv = document.getElementById('action_items1');
-    
-        // Add click event listener to the action items button
-        actionItemsBtn.addEventListener('click', function() {
-            // Toggle the display of the action items div
-            if (actionItemsDiv.style.display === 'none') {
-                actionItemsDiv.style.display = 'block';
-            } else {
-                actionItemsDiv.style.display = 'none';
-            }
-        });
+
+
     </script>
     
 </body>
