@@ -117,37 +117,38 @@ def get_reviews(soup,  candidate_labels, classifier, sentiment_model, product_ur
             review_text = review_text_elem.text.strip() if review_text_elem  else ""
 
             sentiment = ""
-            sentiment_result = sentiment_model(review_text)[0]['label']
-            if sentiment_result == 'positive':
-                sentiment = 1
-            elif sentiment_result == 'neutral':
-                sentiment = 1
-            elif sentiment_result == 'negative':
-                sentiment = 0
-            
-            result = classifier(review_text,candidate_labels) #Getting scores for each feature
-            labels = result['labels']
-            scores = result['scores']
-    
-            num_feats = len(scores)
-    
-            a = 0
-            for i in range(num_feats - 1):
-                if scores[i+1] / scores[i] >= 0.75:
-                    a = i
-                else:
-                    break
-            labels = labels[:a+1]
-            # scores = [str(x) for x in scores]
-            review = {
-                'title': title,
-                'rating': rating,
-                'date': date,
-                'review': review_text,
-                'features': labels,
-                'sentiment' : sentiment
-            }
-            reviewlist.append(review)
+            if review_text != "": #(NEW)
+                sentiment_result = sentiment_model(review_text)[0]['label']
+                if sentiment_result == 'positive':
+                    sentiment = 1
+                elif sentiment_result == 'neutral':
+                    sentiment = 1
+                elif sentiment_result == 'negative':
+                    sentiment = 0
+                
+                result = classifier(review_text,candidate_labels) #Getting scores for each feature
+                labels = result['labels']
+                scores = result['scores']
+        
+                num_feats = len(scores)
+        
+                a = 0
+                for i in range(num_feats - 1):
+                    if scores[i+1] / scores[i] >= 0.75:
+                        a = i
+                    else:
+                        break
+                labels = labels[:a+1]
+                # scores = [str(x) for x in scores]
+                review = {
+                    'title': title,
+                    'rating': rating,
+                    'date': date,
+                    'review': review_text,
+                    'features': labels,
+                    'sentiment' : sentiment
+                }
+                reviewlist.append(review)
     except Exception as e:
         print("Error occurred while parsing review:", e)
     return reviewlist
@@ -169,6 +170,18 @@ def scrape_amazon_reviews(product_url, star_ratings, candidate_labels, classifie
             
             reviewlist.extend(reviews)
             print('Total reviews collected so far:', len(reviewlist))
+
+            # Check if the number of ratings is less than 10 (NEW)
+            ratings_count_element = soup.find('div', {'data-hook': 'cr-filter-info-review-rating-count'})
+            if ratings_count_element:
+                ratings_text = ratings_count_element.get_text(strip=True)
+                match = re.search(r'(\d+) with reviews', ratings_text)
+                if match:
+                    total_reviews = int(match.group(1))
+                    #print(f'Total reviews available for {rating} star is {total_reviews}')
+                    if total_reviews <=10:
+                        print(f'Only {total_reviews} found in this page. Exiting the loop for {rating} star.')
+                        break  # Break out of the inner loop for this star rating (NEW)
             
             if not soup.find('li', {'class': 'a-disabled a-last'}):
                 pass
