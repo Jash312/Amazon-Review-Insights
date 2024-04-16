@@ -236,11 +236,9 @@ def get_action_items(llm, product, pros_cons_by_features):
     prompt_template = """Provide the action items / recommendations for the product owner using below pros and cons 
     that are extracted from the customer reviews:
     Product - {product}
-    "{text}"
+    Pros and cons - "{text}"
 
-    Output MUST be PIPE SEPARATED VALUES(|).
-
-    """
+    Output FORMAT MUST ONLY be PIPE SEPARATED VALUES(|), Example: "action item 1|action item 2|action item n"."""
     prompt = PromptTemplate.from_template(prompt_template)
 
     llm_chain = LLMChain(llm=llm, prompt=prompt)
@@ -249,7 +247,14 @@ def get_action_items(llm, product, pros_cons_by_features):
     stuff_chain = StuffDocumentsChain(llm_chain=llm_chain, document_variable_name="text")
 
     result = stuff_chain.run({'input_documents': [pros_cons_doc], 'product': product})
-    return result.split("|")
+
+    split = result.split("|")
+
+    if len(split) == 1:
+        print("Output format is not right, splitting with new line", split)
+        split = result.split("\n")
+
+    return split
 
 
 def main(review_id, is_prod, openai_key):
