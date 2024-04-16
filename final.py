@@ -167,7 +167,7 @@ def display(product_id):
 
     # Calculate the percentage of positive sentiment within each 1-month window
     percentage_positive_sentiment = (last_sentiment_monthly_sum / last_total_sentiment_monthly_count) * 100
-    print(percentage_positive_sentiment)
+    # print(percentage_positive_sentiment)
 
     # Create Plotly figure for the 2-week moving average ratings
     fig = go.Figure()

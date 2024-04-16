@@ -41,7 +41,7 @@ def generate_word_cloud(reviews_df):
     # Generate word frequencies
     word_freq = pd.Series(filtered_tokens).value_counts()
 
-    # Get top 20 words
+    # Get top 50 words
     top_words = word_freq.head(50)
 
     # Convert to dictionary for WordCloud
