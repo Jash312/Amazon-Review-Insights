@@ -25,8 +25,10 @@
                 </div>
                 <!-- Image on the left -->
                 <div class="col-md-4">
-                    <img src="{{ products['Image_URL'] }}" alt="{{ products['Title'] }}" class="rounded img-fluid shadow-lg border border-secondary">
-                </div>                
+                    <a href="{{ products['Product_URL'] }}">
+                        <img src="{{ products['Image_URL'] }}" alt="{{ products['Title'] }}" class="rounded img-fluid shadow-lg border border-secondary">
+                    </a>
+                </div>             
                 <!-- Details on the right -->
                 <div class="col-md-8">
                     <h3>{{ products['Title'] }}</h3>

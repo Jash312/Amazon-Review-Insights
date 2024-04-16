@@ -14,7 +14,7 @@ import summarize_review
 from summarize_review import get_db
 from dotenv import load_dotenv
 import os
-
+import threading
 # Load environment variables from .env file
 load_dotenv()
 mongo_uri = "mongodb+srv://Admin:Admin1234@cluster0.lhuhlns.mongodb.net"
@@ -87,17 +87,29 @@ def scrape_amazon_and_save_to_excel(product_url):
     else:
         print('Invalid URL or pattern not found.')
         return None
+    
+def scrape_and_redirect(product_url):
+    product_id = scrape_amazon_and_save_to_excel(product_url)
+    if product_id:
+        return redirect(url_for('display', product_id=product_id))
+    else:
+        return render_template('failure.html')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         product_url = request.form['product_url']
-        product_id = scrape_amazon_and_save_to_excel(product_url)
-        if product_id:
-            return redirect(url_for('display', product_id=product_id))
-        else:
-            return render_template('failure.html')
+        # Start a new thread to run the scraping task
+        threading.Thread(target=scrape_and_redirect, args=(product_url,)).start()
+        # Redirect to dino.html while the scraping process is running
+        return redirect(url_for('dino'))
     return render_template('index.html')
+
+
+
+@app.route('/dino')
+def dino():
+    return render_template('dino.html')
 
 @app.route('/display/<product_id>', methods=['GET'])
 def display(product_id):
