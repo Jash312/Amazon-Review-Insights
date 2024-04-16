@@ -54,7 +54,11 @@
                             <button id="actionItemsBtn" class="btn btn-primary me-2 mb-2">Action Items</button>
                         </div>
                         <div class="action_items1" id="action_items1" style="display: none;">
-                            <p><strong>{{ dft['Action Items'] }} </strong></p>
+                            <ul>
+                                {% for rev1 in dft['Action Items'] %}
+                                <li>{{ rev1 }}</li>
+                                {% endfor %}
+                                </ul>
                         </div>
 
 

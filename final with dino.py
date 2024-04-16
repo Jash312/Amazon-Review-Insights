@@ -128,6 +128,7 @@ def display(product_id):
         product_details1 = document.get('Product_Details', {})
         reviews_data = document.get('Reviews', [])
         summarized = document.get('Summary',{})
+        action_items = document.get('ActionItems',{})
 
     else:
         print("Document not found with the specified ID.")
@@ -155,19 +156,17 @@ def display(product_id):
     # Calculate 2-week moving average of ratings
     ratings_2_weeks_ma = review_df['rating'].rolling(window=f'{window_size}D').mean()
 
-    Default_pros_cons = {}
-    # Default_pros_cons['Pros'] = "\n".join(summarized['All_features']['pros'])
-    # Default_pros_cons['Cons'] = "\n".join(summarized['All_features']['cons'])
-    Default_pros_cons['Action Items'] = 'Default action items'
-    # Default_pros_cons['Cons'] = 'Cons'
+    Default_action_items = {}
+    Default_action_items['Action Items'] = action_items
+
 
 
     pros_dict = {}
     cons_dict = {}
     
     for feature in features_list:
-        pros_dict[feature] = summarized['feature_summary'][feature]['pros']
-        cons_dict[feature] = summarized['feature_summary'][feature]['cons']
+        pros_dict[feature] = summarized['feature_summary'][feature.replace(" ", "")]['pros']
+        cons_dict[feature] = summarized['feature_summary'][feature.replace(" ", "")]['cons']
 
     # Calculate 1-month rolling sum of positive sentiment (1) and total sentiment
     sentiment_1_month_sum = review_df['sentiment'].rolling(window=f'{window_size}D').sum()
@@ -230,7 +229,7 @@ def display(product_id):
     wordcloud_image_path1 = generate_word_cloud(review_df)
 
     # Render the template with product details and plot HTML
-    return render_template('index_bootstrap.html', products=product_details1, features_list1=features_list, pros=pros_dict, cons=cons_dict, dft=Default_pros_cons)
+    return render_template('index_bootstrap.html', products=product_details1, features_list1=features_list, pros=pros_dict, cons=cons_dict, dft=Default_action_items)
 
 if __name__ == '__main__':
     app.run(debug=True)

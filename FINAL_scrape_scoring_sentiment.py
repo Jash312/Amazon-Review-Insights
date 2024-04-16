@@ -78,7 +78,7 @@ def get_product_details(product_url, excel_file):
     
     df = pd.DataFrame([product_details])
 
-    df.to_excel(excel_file, index=False)
+    # df.to_excel(excel_file, index=False)
     print('Product details saved to', excel_file)
 
     return product_details
@@ -241,7 +241,7 @@ if __name__ == '__main__':
     all_reviews = scrape_amazon_reviews(modified_url, star_ratings, candidate_labels, classifier, sentiment_model)
     
     df = pd.DataFrame(all_reviews)
-    df.to_excel(excel_file_reviews, index=False)
+    # df.to_excel(excel_file_reviews, index=False)
     print('Excel is Ready!')
     
     insert_product_info_to_mongodb(product_url, product_details, all_reviews)
