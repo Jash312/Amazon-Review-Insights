@@ -42,13 +42,21 @@ def generate_word_cloud(reviews_df):
     word_freq = pd.Series(filtered_tokens).value_counts()
 
     # Get top 20 words
+<<<<<<< HEAD
     top_words = word_freq.head(50)
+=======
+    top_words = word_freq.head(20)
+>>>>>>> 900891a (fixed the error related to empty reviews)
 
     # Convert to dictionary for WordCloud
     wordcloud_data = top_words.to_dict()
 
     # Generate word cloud
+<<<<<<< HEAD
     wordcloud = WordCloud(width=800, height=800, background_color='white').generate_from_frequencies(wordcloud_data)
+=======
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(wordcloud_data)
+>>>>>>> 900891a (fixed the error related to empty reviews)
 
     # Save the word cloud as an image
     image_path = f"static/wordcloud.png"

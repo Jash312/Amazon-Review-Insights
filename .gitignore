@@ -1,4 +1,8 @@
 scrapping/
 static/
+<<<<<<< HEAD
 .env
 __pycache__/
+=======
+Templates/
+>>>>>>> 900891a (fixed the error related to empty reviews)
