@@ -24,13 +24,13 @@
                     <h1 class="display-6 fw-bold" style="background-color: rgba(0,0,0,0.5); padding: 10px;">Amazon Review Insights</h1>
                 </div>
                 <!-- Image on the left -->
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <a href="{{ products['Product_URL'] }}">
-                        <img src="{{ products['Image_URL'] }}" alt="{{ products['Title'] }}" class="rounded img-fluid shadow-lg border border-secondary">
+                        <img src="{{ products['Image_URL'] }}" alt="{{ products['Title'] }}" class="rounded shadow-lg border border-secondary image" height="350" width="250">
                     </a>
                 </div>             
                 <!-- Details on the right -->
-                <div class="col-md-8">
+                <div class="col-md-9">
                     <h3>{{ products['Title'] }}</h3>
                     <p class="mb-3"><strong>Rating:</strong> {{ products['Overall_Rating'] }}</p>
                     <p class="mb-3"><strong>Price:</strong> {{ products['Final_Price'] }}</p>

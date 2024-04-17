@@ -14,7 +14,7 @@
                 <div class="card shadow">
                     <div class="card-body">
                         <h1 class="text-center mb-4">Amazon Review Insights</h1>
-                        <form id="amazonForm"   method="post">
+                        <form id="amazonForm" method="post" onsubmit="showDino()">
                             <div class="mb-3">
                                 <label for="product_url" class="form-label">Enter Amazon URL:</label>
                                 <input type="text" class="form-control" id="product_url" name="product_url">
@@ -28,30 +28,17 @@
             </div>
         </div>
     </div>
-    <!-- Container to display scraping progress -->
-    <div id="scrappingProgress" style="display: none;" class="container mt-3">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow">
-                    <div class="card-body">
-                        <div id="progressMessage"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- iframe to display dino.html -->
+    <iframe id="dinoFrame" style="display: none; width: 100%; height: 500px;", src="{{ dino_game }}"></iframe>
 
     <script>
-        function showScrappingProgress() {
+        function showDino() {
             var form = document.getElementById('amazonForm');
             var productUrl = form.elements.product_url.value;
             if (productUrl.trim() !== '') {
-                var progressContainer = document.getElementById('scrappingProgress');
-                progressContainer.style.display = 'block';
-                var progressMessage = document.getElementById('progressMessage');
-                progressMessage.innerHTML = 'Scraping Progress...'; // Update the progress message
-                // Now initiate the scraping process, for example:
-                // You can use AJAX to send the URL to your server for scraping and update the progress here.
+                var iframe = document.getElementById('dinoFrame');
+                iframe.style.display = 'block';
+                // iframe.src = 'dino.html';
             } else {
                 alert('Please enter a valid Amazon URL.');
             }
