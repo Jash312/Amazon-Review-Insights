@@ -2,3 +2,4 @@ scrapping
 static
 .env
 __pycache__
+venv

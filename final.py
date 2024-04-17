@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
 import pandas as pd
 import time
-from FINAL_scrape_scoring_sentiment import get_Title,get_product_details, get_scraping_link, scrape_amazon_reviews, initialize_classifier ,insert_product_info_to_mongodb
+from FINAL_scrape_scoring_sentiment import get_Title, get_product_details, get_scraping_link, scrape_amazon_reviews, \
+    initialize_classifier, insert_product_info_to_mongodb
 from transformers import pipeline
 import plotly.graph_objs as go
 import numpy as np
@@ -23,6 +24,7 @@ api_key = os.environ.get("API_KEY")
 
 app = Flask(__name__)
 
+
 def check_exist(product_url):
     Title = get_Title(product_url)
     db = get_db(mongo_uri)
@@ -30,17 +32,17 @@ def check_exist(product_url):
     # Access the collection
     collection = db["Amazon_Reviews"]
     result = collection.find_one({"Product_Details.Title": Title})
-    
 
     if result:
-        print('Already Existed',str(result.get('_id')))
+        print('Already Existed', str(result.get('_id')))
         return str(result.get('_id'))
+
 
 def scrape_amazon_and_save_to_excel(product_url):
     product_id = check_exist(product_url)
     if product_id:
         return product_id
-    
+
     start_time = time.time()
 
     # Initializing the classifier
@@ -49,19 +51,18 @@ def scrape_amazon_and_save_to_excel(product_url):
 
     # Initializing the sentiment model
     model_name = 'cardiffnlp/twitter-roberta-base-sentiment-latest'
-    sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name, max_length=512, truncation=True)
-    #sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name)
+    sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name, max_length=512,
+                               truncation=True)
+    # sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name)
 
     # Scraping and processing Amazon reviews
     excel_file_product_details = '.\\scrapping\\product_details.xlsx'
     excel_file_reviews = '.\\scrapping\\amazon_reviews.xlsx'
 
-
-
     product_details = get_product_details(product_url, excel_file_product_details)
     while product_details["Features"] == [""]:
         product_details = get_product_details(product_url, excel_file_product_details)
-            
+
     modified_url = get_scraping_link(product_url)
     print(product_details)
 
@@ -78,7 +79,7 @@ def scrape_amazon_and_save_to_excel(product_url):
 
         # Insert product info to MongoDB
         product_id = insert_product_info_to_mongodb(product_url, product_details, all_reviews)
-        summarize_review.main(product_id,"True",openai_key=api_key)
+        summarize_review.main(product_id, "True", openai_key=api_key)
         end_time = time.time()
         execution_time = end_time - start_time
         print('Execution time:', execution_time, 'seconds')
@@ -87,6 +88,7 @@ def scrape_amazon_and_save_to_excel(product_url):
     else:
         print('Invalid URL or pattern not found.')
         return None
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -99,6 +101,7 @@ def index():
             return render_template('failure.html')
     return render_template('index.html')
 
+
 @app.route('/display/<product_id>', methods=['GET'])
 def display(product_id):
     # Access the database
@@ -108,15 +111,15 @@ def display(product_id):
     collection = db["Amazon_Reviews"]
 
     # Query the collection for the document with the specified ID
-    document = collection.find_one({"_id":  ObjectId(product_id)})
+    document = collection.find_one({"_id": ObjectId(product_id)})
 
     if document:
         print('Document fetched')
         # Extract product details (features) and reviews
         product_details1 = document.get('Product_Details', {})
         reviews_data = document.get('Reviews', [])
-        summarized = document.get('Summary',{})
-        action_items = document.get('ActionItems',{})
+        summarized = document.get('Summary', {})
+        action_items = document.get('ActionItems', {})
 
     else:
         print("Document not found with the specified ID.")
@@ -130,13 +133,12 @@ def display(product_id):
     review_df['date'] = pd.to_datetime(review_df['date'])
     review_df.dropna(subset=['date'], inplace=True)
     review_df.set_index('date', inplace=True)
-    
+
     # Convert 'rating' column to numeric
     review_df['rating'] = pd.to_numeric(review_df['rating'], errors='coerce')
 
     # Convert 'sentiment' column to numeric
     review_df['sentiment'] = pd.to_numeric(review_df['sentiment'], errors='coerce')
-    
 
     # Sort DataFrame by date index
     review_df.sort_index(inplace=True)
@@ -147,10 +149,9 @@ def display(product_id):
     Default_action_items = {}
     Default_action_items['Action Items'] = action_items
 
-
     pros_dict = {}
     cons_dict = {}
-    
+
     for feature in features_list:
         pros_dict[feature] = summarized['feature_summary'][feature.replace(" ", "")]['pros']
         cons_dict[feature] = summarized['feature_summary'][feature.replace(" ", "")]['cons']
@@ -171,7 +172,8 @@ def display(product_id):
 
     # Create Plotly figure for the 2-week moving average ratings
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=ratings_2_weeks_ma.index, y=ratings_2_weeks_ma.values, mode='lines', name=f'{window_size}-Day Moving Average Ratings'))
+    fig.add_trace(go.Scatter(x=ratings_2_weeks_ma.index, y=ratings_2_weeks_ma.values, mode='lines',
+                             name=f'{window_size}-Day Moving Average Ratings'))
 
     # Add shaded regions for sentiment percentages
     for month_end_date, percent in percentage_positive_sentiment.items():
@@ -217,7 +219,9 @@ def display(product_id):
     wordcloud_image_path1 = generate_word_cloud(review_df)
 
     # Render the template with product details and plot HTML
-    return render_template('index_bootstrap.html', products=product_details1, features_list1=features_list, pros=pros_dict, cons=cons_dict, dft=Default_action_items)
+    return render_template('index_bootstrap.html', products=product_details1, features_list1=features_list,
+                           pros=pros_dict, cons=cons_dict, dft=Default_action_items)
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
