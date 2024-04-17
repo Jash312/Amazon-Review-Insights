@@ -15,6 +15,8 @@ import summarize_review
 from summarize_review import get_db
 from dotenv import load_dotenv
 import os
+from functools import lru_cache
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -37,14 +39,8 @@ def check_exist(product_url):
         print('Already Existed', str(result.get('_id')))
         return str(result.get('_id'))
 
-
-def scrape_amazon_and_save_to_excel(product_url):
-    product_id = check_exist(product_url)
-    if product_id:
-        return product_id
-
-    start_time = time.time()
-
+@lru_cache
+def models_intializer():
     # Initializing the classifier
     model_name = "Recognai/zeroshot_selectra_medium"
     classifier = initialize_classifier(model_name)
@@ -53,6 +49,18 @@ def scrape_amazon_and_save_to_excel(product_url):
     model_name = 'cardiffnlp/twitter-roberta-base-sentiment-latest'
     sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name, max_length=512,
                                truncation=True)
+
+    return(classifier,sentiment_model)
+
+def scrape_amazon_and_save_to_excel(product_url):
+    product_id = check_exist(product_url)
+    if product_id:
+        return product_id
+
+    start_time = time.time()
+
+    classifier , sentiment_model = models_intializer()
+
     # sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name)
 
     # Scraping and processing Amazon reviews
@@ -204,7 +212,7 @@ def display(product_id):
 
     # Update layout
     fig.update_layout(
-        title=f'{window_size}-Day Moving Average Ratings Over Time',
+        title=f'Average Rating and Monthly Sentiment over Time',
         xaxis_title='Date',
         yaxis_title=f'{window_size}-Day Moving Average Rating',
         xaxis_tickangle=-45,
@@ -212,14 +220,14 @@ def display(product_id):
     )
 
     # Save the plot as an HTML file
-    plot_html1 = f"static/ratings_plot.html"
+    plot_html1 = f"static/rating_plot_{product_id}.html"
     fig.write_html(plot_html1)
 
     # Generate word cloud
-    wordcloud_image_path1 = generate_word_cloud(review_df)
+    wordcloud_image_path1 = generate_word_cloud(review_df,product_id)
 
     # Render the template with product details and plot HTML
-    return render_template('index_bootstrap.html', products=product_details1, features_list1=features_list,
+    return render_template('index_bootstrap.html',rating = plot_html1, word_cloud = wordcloud_image_path1, products=product_details1, features_list1=features_list,
                            pros=pros_dict, cons=cons_dict, dft=Default_action_items)
 
 

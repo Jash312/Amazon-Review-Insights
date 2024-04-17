@@ -96,7 +96,7 @@ def filter_nouns(tokens):
     return nouns
 
 # Function to generate word cloud
-def generate_word_cloud(reviews_df):
+def generate_word_cloud(reviews_df,product_id):
     # Join all reviews into a single string
     reviews = ' '.join(reviews_df['review'])
 
@@ -133,7 +133,7 @@ def generate_word_cloud(reviews_df):
     wordcloud = WordCloud(width=800, height=800, background_color='white').generate_from_frequencies(word_freq)
 
     # Save the word cloud as an image
-    image_path = f"static/wordcloud.png"
+    image_path = f"static/wordcloud_{product_id}.png"
     wordcloud.to_file(image_path)
     print('image_path')
     return image_path

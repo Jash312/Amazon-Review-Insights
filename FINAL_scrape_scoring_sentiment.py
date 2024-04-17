@@ -7,6 +7,13 @@ import re
 import pymongo
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 from pymongo import MongoClient
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+SPLASH_HOST = os.environ.get("SPLASH_HOST")
+print("SPLASH_HOST: ",SPLASH_HOST)
+
 
 client = pymongo.MongoClient("mongodb+srv://Admin:Admin1234@cluster0.lhuhlns.mongodb.net")
 db = client["Full_Stack_Project"]
@@ -33,7 +40,7 @@ def get_scraping_link(url):
         return None
 
 def get_soup(url):
-    r = requests.get('http://localhost:8050/render.html', params={'url': url, 'wait': 2})
+    r = requests.get(f'http://{SPLASH_HOST}:8050/render.html', params={'url': url, 'wait': 2})
     #r=requests.get(product_url)
     soup = BeautifulSoup(r.text, 'html.parser')
     return soup
