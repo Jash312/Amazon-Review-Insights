@@ -3,7 +3,7 @@ services:
   flask_app:
     build: .
     ports:
-      - "5000:5000"  # Expose Flask app to outer environment
+      - "0.0.0.0:5000:5000"  # Expose Flask app to outer environment
     depends_on:
       - splash
 

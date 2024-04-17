@@ -160,10 +160,10 @@ def display(product_id):
     total_sentiment_1_month = review_df['sentiment'].rolling(window=f'{window_size}D').count()
 
     # Resample sentiment_1_month_sum to the end of each month and take the last value
-    last_sentiment_monthly_sum = sentiment_1_month_sum.resample('ME').last()
+    last_sentiment_monthly_sum = sentiment_1_month_sum.resample('M').last()
 
     # Resample total_sentiment_1_month to the end of each month and take the last value
-    last_total_sentiment_monthly_count = total_sentiment_1_month.resample('ME').last()
+    last_total_sentiment_monthly_count = total_sentiment_1_month.resample('M').last()
 
     # Calculate the percentage of positive sentiment within each 1-month window
     percentage_positive_sentiment = (last_sentiment_monthly_sum / last_total_sentiment_monthly_count) * 100
