@@ -16,11 +16,11 @@
                         <h1 class="text-center mb-4">Amazon Review Insights</h1>
                         <form id="amazonForm"   method="post">
                             <div class="mb-3">
-                                <label for="product_url" class="form-label">Enter Amazon URL:</label>
+                                <label for="product_url" class="form-label">Enter Amazon.com Product URL:</label>
                                 <input type="text" class="form-control" id="product_url" name="product_url">
                             </div>
                             <div class="text-center">
-                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <button type="submit" class="btn btn-primary">Generate Report</button>
                             </div>
                         </form>
                     </div>
@@ -41,22 +41,6 @@
         </div>
     </div>
 
-    <script>
-        function showScrappingProgress() {
-            var form = document.getElementById('amazonForm');
-            var productUrl = form.elements.product_url.value;
-            if (productUrl.trim() !== '') {
-                var progressContainer = document.getElementById('scrappingProgress');
-                progressContainer.style.display = 'block';
-                var progressMessage = document.getElementById('progressMessage');
-                progressMessage.innerHTML = 'Scraping Progress...'; // Update the progress message
-                // Now initiate the scraping process, for example:
-                // You can use AJAX to send the URL to your server for scraping and update the progress here.
-            } else {
-                alert('Please enter a valid Amazon URL.');
-            }
-            return false; // Prevent form submission
-        }
-    </script>
+
 </body>
 </html>

@@ -49,7 +49,7 @@
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="action_items1 p-3" id="action_items1" style="display: block; background-color: rgba(255, 255, 255, 0.8); box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);">
-                    <h4 class="text-center">Action items for Sellers</h4>
+                    <h4 class="text-left">Action items for Sellers</h4>
                     <ul>
                         {% for rev1 in dft['Action Items'] %}
                         <li>{{ rev1 }}</li>
@@ -75,9 +75,9 @@
                     <div class="pros-cons-container" style="display: block; ">
                         {% for feature in features_list1 %}
                         <div class="pros-cons" id="{{ feature }}-pros-cons" style="display: none; "> <!-- Hide by default -->
-                            <div class="row"style="width: 1300px; height: 200px; overflow-x: hidden; overflow-y: auto; background-color: rgba(255, 255, 255, 0.8); box-shadow: 0 0 10px rgba(0, 0, 0, 0.3)  ">
+                            <div class="row"style="width: 1300px; height: 200px; overflow-x: hidden; overflow-y: auto; background-color: rgba(255, 255, 255, 0.8); box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);  ">
                                 <div class="col-md-6">
-                                    <h4 class="text-center text-success ">Pros</h4>
+                                    <h4 class="text-left text-success ">Pros</h4>
                                     <ul>
                                         {% for rev in pros[feature] %}
                                         <li>{{ rev }}</li>
@@ -85,7 +85,7 @@
                                     </ul>
                                 </div>
                                 <div class="col-md-6">
-                                    <h4 class="text-center text-danger">Cons</h4>
+                                    <h4 class="text-left text-danger">Cons</h4>
                                     <ul>
                                         {% for rev1 in cons[feature] %}
                                         <li>{{ rev1 }}</li>
@@ -102,12 +102,12 @@
     </div>
     
 
-    <div class="container mt-4">
+    <div class="container mt-4 ">
         <div class="row">
             <!-- Word cloud -->
-            <div class="col-md-4 d-flex justify-content-center align-items-center">
+            <div class="col-md-4 d-flex justify-content-center align-items-center text-left">
                 <div class="d-flex flex-column justify-content-center align-items-center" style="height: 100%;">
-                    <h6>Most used words in the reviews</h6>
+                    <h6 >Most used words in the reviews</h6>
 <!--                    <img src="/{{ word_cloud }}" height="400" width="400" alt="Wordcloud" class="rounded img-fluid shadow-lg border-secondary" style="max-width: 100%; max-height: 100%;">-->
                     <div id="word_cloud"></div>
                 </div>
