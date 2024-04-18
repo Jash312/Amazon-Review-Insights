@@ -249,7 +249,7 @@ def display(product_id):
 
 
 @app.route('/health')
-def dino():
+def health():
     return {"message": "server is up"}
 
 
