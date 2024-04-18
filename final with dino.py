@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
 import pandas as pd
 import time
-from FINAL_scrape_scoring_sentiment import get_Title,get_product_details, get_scraping_link, scrape_amazon_reviews, initialize_classifier ,insert_product_info_to_mongodb
+from FINAL_scrape_scoring_sentiment import get_Title, get_product_details, get_scraping_link, scrape_amazon_reviews, \
+    initialize_classifier, insert_product_info_to_mongodb
 from transformers import pipeline
 import plotly.graph_objs as go
 import numpy as np
@@ -20,12 +21,9 @@ import uuid
 import redis
 
 redis_messages = redis.Redis(
-  host='redis-18614.c73.us-east-1-2.ec2.cloud.redislabs.com',
-  port=18614,
-  password='ntXzvQ3cVyPFkQB3lK0IIAkMu8RKu8mc', decode_responses=True)
-
-
-
+    host='redis-18614.c73.us-east-1-2.ec2.cloud.redislabs.com',
+    port=18614,
+    password='ntXzvQ3cVyPFkQB3lK0IIAkMu8RKu8mc', decode_responses=True)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -35,16 +33,18 @@ api_key = os.environ.get("API_KEY")
 
 app = Flask(__name__)
 
-def red_msg(req_id,status,Messages,product_id=None):
+
+def red_msg(req_id, status, Messages, product_id=None):
     message1 = {
         "Status": status,
         "Message": Messages
     }
-     
+
     if product_id is not None:
-         message1['Product_id'] = str(product_id)
+        message1['Product_id'] = str(product_id)
 
     redis_messages.hset(req_id, mapping=message1)
+
 
 def check_exist(product_url):
     Title = get_Title(product_url)
@@ -55,15 +55,16 @@ def check_exist(product_url):
     result = collection.find_one({"Product_Details.Title": Title})
 
     if result:
-        print('Already Existed',str(result.get('_id')))
+        print('Already Existed', str(result.get('_id')))
         return str(result.get('_id'))
 
-def scrape_amazon_and_save_to_excel(product_url,req_id):
+
+def scrape_amazon_and_save_to_excel(product_url, req_id):
     product_id = check_exist(product_url)
     if product_id:
-        red_msg(req_id,"Completed"," Generating Insights",product_id)
+        red_msg(req_id, "Completed", " Generating Insights", product_id)
         return product_id
-    
+
     start_time = time.time()
 
     # Initializing the classifier
@@ -72,20 +73,20 @@ def scrape_amazon_and_save_to_excel(product_url,req_id):
 
     # Initializing the sentiment model
     model_name = 'cardiffnlp/twitter-roberta-base-sentiment-latest'
-    sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name, max_length=512, truncation=True)
-    #sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name)
+    sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name, max_length=512,
+                               truncation=True)
+    # sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name)
 
- 
     # Scraping and processing Amazon reviews
     excel_file_product_details = '.\\scrapping\\product_details.xlsx'
     excel_file_reviews = '.\\scrapping\\amazon_reviews.xlsx'
 
-    red_msg(req_id,"Incompleted","Scraping Started")
+    red_msg(req_id, "Incompleted", "Scraping Started")
 
     product_details = get_product_details(product_url, excel_file_product_details)
     while product_details["Features"] == [""]:
         product_details = get_product_details(product_url, excel_file_product_details)
-    red_msg(req_id,"Incompleted","Product Details Retrived")
+    red_msg(req_id, "Incompleted", "Product Details Retrived")
 
     modified_url = get_scraping_link(product_url)
     print(product_details)
@@ -94,31 +95,33 @@ def scrape_amazon_and_save_to_excel(product_url,req_id):
         star_ratings = ['one', 'two', 'three', 'four', 'five']
         candidate_labels = product_details["Features"]
         candidate_labels = candidate_labels[0].replace(" ", "").split(",")
-        red_msg(req_id,"Incompleted","Scrapping In Progress")
+        red_msg(req_id, "Incompleted", "Scrapping In Progress")
         all_reviews = scrape_amazon_reviews(modified_url, star_ratings, candidate_labels, classifier, sentiment_model)
 
         # Save reviews to Excel
         df = pd.DataFrame(all_reviews)
         df.to_excel(excel_file_reviews, index=False)
         print('Excel is Ready!')
-        red_msg(req_id,"Incompleted","Scrapping Completed")
+        red_msg(req_id, "Incompleted", "Scrapping Completed")
 
         # Insert product info to MongoDB
         product_id = insert_product_info_to_mongodb(product_url, product_details, all_reviews)
-        red_msg(req_id,"Incompleted","Generating Action Items ")
-        summarize_review.main(product_id,"True",openai_key=api_key)
-        red_msg(req_id,"Incompleted","Generating Pros and Cons")
+        red_msg(req_id, "Incompleted", "Generating Action Items ")
+        summarize_review.main(product_id, "True", openai_key=api_key)
+        red_msg(req_id, "Incompleted", "Generating Pros and Cons")
         end_time = time.time()
         execution_time = end_time - start_time
         print('Execution time:', execution_time, 'seconds')
-        red_msg(req_id,"Completed",f"Generating Insights, it took {execution_time} seconds",product_id)
+        red_msg(req_id, "Completed", f"Generating Insights, it took {execution_time} seconds", product_id)
         return product_id
     else:
         print('Invalid URL or pattern not found.')
         return None
-    
-def scrape_and_redirect(product_url,req_id):
-    scrape_amazon_and_save_to_excel(product_url,req_id)
+
+
+def scrape_and_redirect(product_url, req_id):
+    scrape_amazon_and_save_to_excel(product_url, req_id)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -126,7 +129,7 @@ def index():
         req_id = str(uuid.uuid4())
         product_url = request.form['product_url']
         # Start a new thread to run the scraping task
-        threading.Thread(target=scrape_and_redirect, args=(product_url,req_id)).start()
+        threading.Thread(target=scrape_and_redirect, args=(product_url, req_id)).start()
         # time.sleep(5000)
         return redirect(url_for('dino', req_id=req_id))
     return render_template('index.html')
@@ -144,6 +147,7 @@ def get_status():
 def dino():
     return render_template('dino.html')
 
+
 @app.route('/display/<product_id>', methods=['GET'])
 def display(product_id):
     # Access the database
@@ -153,15 +157,15 @@ def display(product_id):
     collection = db["Amazon_Reviews"]
 
     # Query the collection for the document with the specified ID
-    document = collection.find_one({"_id":  ObjectId(product_id)})
+    document = collection.find_one({"_id": ObjectId(product_id)})
 
     if document:
         print('Document fetched')
         # Extract product details (features) and reviews
         product_details1 = document.get('Product_Details', {})
         reviews_data = document.get('Reviews', [])
-        summarized = document.get('Summary',{})
-        action_items = document.get('ActionItems',{})
+        summarized = document.get('Summary', {})
+        action_items = document.get('ActionItems', {})
 
     else:
         print("Document not found with the specified ID.")
@@ -175,13 +179,12 @@ def display(product_id):
     review_df['date'] = pd.to_datetime(review_df['date'])
     review_df.dropna(subset=['date'], inplace=True)
     review_df.set_index('date', inplace=True)
-    
+
     # Convert 'rating' column to numeric
     review_df['rating'] = pd.to_numeric(review_df['rating'], errors='coerce')
 
     # Convert 'sentiment' column to numeric
     review_df['sentiment'] = pd.to_numeric(review_df['sentiment'], errors='coerce')
-    
 
     # Sort DataFrame by date index
     review_df.sort_index(inplace=True)
@@ -192,11 +195,9 @@ def display(product_id):
     Default_action_items = {}
     Default_action_items['Action Items'] = action_items
 
-
-
     pros_dict = {}
     cons_dict = {}
-    
+
     for feature in features_list:
         pros_dict[feature] = summarized['feature_summary'][feature.replace(" ", "")]['pros']
         cons_dict[feature] = summarized['feature_summary'][feature.replace(" ", "")]['cons']
@@ -216,14 +217,14 @@ def display(product_id):
 
     # Create Plotly figure for the 2-week moving average ratings
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=ratings_2_weeks_ma.index, y=ratings_2_weeks_ma.values, mode='lines', name=f'{window_size}-Day Moving Average Ratings'))
+    fig.add_trace(go.Scatter(x=ratings_2_weeks_ma.index, y=ratings_2_weeks_ma.values, mode='lines',
+                             name=f'{window_size}-Day Moving Average Ratings'))
 
     # Add shaded regions for sentiment percentages
     for month_end_date, percent in percentage_positive_sentiment.items():
         start_of_month = month_end_date - pd.offsets.MonthBegin(1)
         color = 'green' if percent >= 50 else 'yellow' if percent >= 40 else 'red'
         fig.add_shape(type="rect", x0=start_of_month, y0=0, x1=month_end_date, y1=5, fillcolor=color, opacity=0.3)
-
 
     # Update layout
     fig.update_layout(
@@ -239,11 +240,18 @@ def display(product_id):
     fig.write_html(plot_html1)
 
     # Generate word cloud
-    wordcloud_image_path1, word_freq = generate_word_cloud(review_df,product_id)
+    wordcloud_image_path1, word_freq = generate_word_cloud(review_df, product_id)
 
     # Render the template with product details and plot HTML
-    return render_template('index_bootstrap.html',rating = plot_html1, word_cloud = wordcloud_image_path1, products=product_details1, features_list1=features_list,
+    return render_template('index_bootstrap.html', rating=plot_html1, word_cloud=wordcloud_image_path1,
+                           products=product_details1, features_list1=features_list,
                            pros=pros_dict, cons=cons_dict, dft=Default_action_items, word_freq=list(word_freq.items()))
 
+
+@app.route('/health')
+def dino():
+    return {"message": "server is up"}
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
