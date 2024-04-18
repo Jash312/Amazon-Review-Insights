@@ -136,10 +136,11 @@ def generate_word_cloud(reviews_df,product_id):
     image_path = f"static/wordcloud_{product_id}.png"
     # wordcloud.to_file(image_path)
     print('image_path')
+    print(word_freq)
     return image_path, word_freq
 
 
 if __name__ =='__main__':
     df_review = pd.read_excel(".\\scrapping\\amazon_reviews.xlsx")
-    generate_word_cloud(df_review)
+    generate_word_cloud(df_review,"product_id")
 

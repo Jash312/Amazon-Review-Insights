@@ -243,7 +243,7 @@ def display(product_id):
 
     # Render the template with product details and plot HTML
     return render_template('index_bootstrap.html',rating = plot_html1, word_cloud = wordcloud_image_path1, products=product_details1, features_list1=features_list,
-                           pros=pros_dict, cons=cons_dict, dft=Default_action_items, word_freq=word_freq)
+                           pros=pros_dict, cons=cons_dict, dft=Default_action_items, word_freq=list(word_freq.items()))
 
 if __name__ == '__main__':
     app.run(debug=True)

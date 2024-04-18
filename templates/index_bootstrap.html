@@ -107,6 +107,7 @@
             <!-- Word cloud -->
             <div class="col-md-4 d-flex justify-content-center align-items-center">
                 <div class="d-flex flex-column justify-content-center align-items-center" style="height: 100%;">
+                    <h6>Most used words in the reviews</h6>
 <!--                    <img src="/{{ word_cloud }}" height="400" width="400" alt="Wordcloud" class="rounded img-fluid shadow-lg border-secondary" style="max-width: 100%; max-height: 100%;">-->
                     <div id="word_cloud"></div>
                 </div>
@@ -124,7 +125,12 @@
     <!-- Load d3-cloud -->
     <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
     <script>
-        var myWords = {{ word_freq | tojson }};
+        // var myWords = {{ word_freq | tojson }};
+        // Retrieve the JSON data from Flask and parse it
+        var myWords = JSON.parse('{{ word_freq | tojson | safe }}');
+
+        // Now you can use the myWords variable in your JavaScript code
+        console.log(myWords);
 
         // List of words
         myWords = myWords.map(word => [word[0], word[1]*300])
