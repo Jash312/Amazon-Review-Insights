@@ -63,7 +63,7 @@
 #     generate_word_cloud(df_review)
 
 
-from wordcloud import WordCloud
+# from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -130,13 +130,13 @@ def generate_word_cloud(reviews_df,product_id):
     word_freq = dict(zip(feature_names, tfidf_matrix.toarray()[0]))
 
     # Generate word cloud
-    wordcloud = WordCloud(width=800, height=800, background_color='white').generate_from_frequencies(word_freq)
+    # wordcloud = WordCloud(width=800, height=800, background_color='white').generate_from_frequencies(word_freq)
 
     # Save the word cloud as an image
     image_path = f"static/wordcloud_{product_id}.png"
-    wordcloud.to_file(image_path)
+    # wordcloud.to_file(image_path)
     print('image_path')
-    return image_path
+    return image_path, word_freq
 
 
 if __name__ =='__main__':

@@ -107,28 +107,74 @@
             <!-- Word cloud -->
             <div class="col-md-4 d-flex justify-content-center align-items-center">
                 <div class="d-flex flex-column justify-content-center align-items-center" style="height: 100%;">
-                    <img src="/{{ word_cloud }}" height="400" width="400" alt="Wordcloud" class="rounded img-fluid shadow-lg border-secondary" style="max-width: 100%; max-height: 100%;">
+<!--                    <img src="/{{ word_cloud }}" height="400" width="400" alt="Wordcloud" class="rounded img-fluid shadow-lg border-secondary" style="max-width: 100%; max-height: 100%;">-->
+                    <div id="word_cloud"></div>
                 </div>
             </div>
             <div class="col-md-8">
                 <!-- Ratings plot -->
                 <div class="text-center">
-<!--                    <h3>Ratings/Sentiment over time</h3>-->
-<!--                    <div class="d-flex justify-content-end mb-0 mt-0">-->
-<!--                        <ul class="list-unstyled text-end mb-0 mt-0">-->
-<!--                            <li>Red - Negative Sentiment</li>-->
-<!--                            <li>Yellow - Neutral Sentiment</li>-->
-<!--                            <li>Green - Positive Sentiment</li>-->
-<!--                        </ul>-->
-<!--                    </div>-->
                     <iframe src="/{{rating}}" style="width: 100%; height: 600px;"></iframe>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <!-- Load d3-cloud -->
+    <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
+    <script>
+        var myWords = {{ word_freq | tojson }};
+
+        // List of words
+        myWords = myWords.map(word => [word[0], word[1]*300])
 
 
+        // set the dimensions and margins of the graph
+        var margin = {top: 10, right: 10, bottom: 10, left: 10},
+            width = 450 - margin.left - margin.right,
+            height = 450 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        var svg = d3.select("#word_cloud").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform",
+                  "translate(" + margin.left + "," + margin.top + ")");
+
+        // Constructs a new cloud layout instance. It run an algorithm to find the position of words that suits your requirements
+        // Wordcloud features that are different from one word to the other must be here
+
+        var wordMap = myWords.map(function(d) { return {text: d[0], size:d[1] }});
+        var layout = d3.layout.cloud()
+          .size([width, height])
+          .words(wordMap)
+          .padding(5)        //space between words
+          .rotate(function() { return ~~(Math.random() * 2) * 90; })
+          .fontSize(function(d) { return d.size; })      // font size of words
+          .on("end", draw);
+        layout.start();
+
+        // This function takes the output of 'layout' above and draw the words
+        // Wordcloud features that are THE SAME from one word to the other can be here
+        function draw(words) {
+          svg
+            .append("g")
+              .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+              .selectAll("text")
+                .data(words)
+              .enter().append("text")
+                .style("font-size", function(d) { return d.size; })
+                .style("fill", "#69b3a2")
+                .attr("text-anchor", "middle")
+                .style("font-family", "Impact")
+                .attr("transform", function(d) {
+                  return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.text; });
+        }
+    </script>
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
@@ -171,8 +217,6 @@
                 prosConsToShow.style.display = 'block';
             });
         });
-    
-
 
     </script>
     

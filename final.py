@@ -17,7 +17,6 @@ from dotenv import load_dotenv
 import os
 from functools import lru_cache
 
-
 # Load environment variables from .env file
 load_dotenv()
 mongo_uri = "mongodb+srv://Admin:Admin1234@cluster0.lhuhlns.mongodb.net"
@@ -39,6 +38,7 @@ def check_exist(product_url):
         print('Already Existed', str(result.get('_id')))
         return str(result.get('_id'))
 
+
 @lru_cache
 def models_intializer():
     # Initializing the classifier
@@ -50,7 +50,8 @@ def models_intializer():
     sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name, max_length=512,
                                truncation=True)
 
-    return(classifier,sentiment_model)
+    return (classifier, sentiment_model)
+
 
 def scrape_amazon_and_save_to_excel(product_url):
     product_id = check_exist(product_url)
@@ -59,7 +60,7 @@ def scrape_amazon_and_save_to_excel(product_url):
 
     start_time = time.time()
 
-    classifier , sentiment_model = models_intializer()
+    classifier, sentiment_model = models_intializer()
 
     # sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name)
 
@@ -224,11 +225,13 @@ def display(product_id):
     fig.write_html(plot_html1)
 
     # Generate word cloud
-    wordcloud_image_path1 = generate_word_cloud(review_df,product_id)
+    wordcloud_image_path1, word_freq = generate_word_cloud(review_df, product_id)
 
     # Render the template with product details and plot HTML
-    return render_template('index_bootstrap.html',rating = plot_html1, word_cloud = wordcloud_image_path1, products=product_details1, features_list1=features_list,
-                           pros=pros_dict, cons=cons_dict, dft=Default_action_items)
+    return render_template('index_bootstrap.html', rating=plot_html1, word_cloud=wordcloud_image_path1,
+                           products=product_details1, features_list1=features_list,
+                           pros=pros_dict, cons=cons_dict, dft=Default_action_items,
+                           word_freq=list(word_freq.items()))
 
 
 if __name__ == '__main__':

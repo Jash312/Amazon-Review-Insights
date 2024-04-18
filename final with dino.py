@@ -239,11 +239,11 @@ def display(product_id):
     fig.write_html(plot_html1)
 
     # Generate word cloud
-    wordcloud_image_path1 = generate_word_cloud(review_df,product_id)
+    wordcloud_image_path1, word_freq = generate_word_cloud(review_df,product_id)
 
     # Render the template with product details and plot HTML
     return render_template('index_bootstrap.html',rating = plot_html1, word_cloud = wordcloud_image_path1, products=product_details1, features_list1=features_list,
-                           pros=pros_dict, cons=cons_dict, dft=Default_action_items)
+                           pros=pros_dict, cons=cons_dict, dft=Default_action_items, word_freq=word_freq)
 
 if __name__ == '__main__':
     app.run(debug=True)
