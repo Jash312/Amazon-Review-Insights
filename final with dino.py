@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from flask import Flask, render_template, request, redirect, url_for
 import pandas as pd
 import time
@@ -59,6 +61,20 @@ def check_exist(product_url):
         return str(result.get('_id'))
 
 
+@lru_cache
+def models_intializer():
+    # Initializing the classifier
+    model_name = "Recognai/zeroshot_selectra_medium"
+    classifier = initialize_classifier(model_name)
+
+    # Initializing the sentiment model
+    model_name = 'cardiffnlp/twitter-roberta-base-sentiment-latest'
+    sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name, max_length=512,
+                               truncation=True)
+
+    return classifier, sentiment_model
+
+
 def scrape_amazon_and_save_to_excel(product_url, req_id):
     product_id = check_exist(product_url)
     if product_id:
@@ -68,13 +84,16 @@ def scrape_amazon_and_save_to_excel(product_url, req_id):
     start_time = time.time()
 
     # Initializing the classifier
-    model_name = "Recognai/zeroshot_selectra_medium"
-    classifier = initialize_classifier(model_name)
+    # model_name = "Recognai/zeroshot_selectra_medium"
+    # classifier = initialize_classifier(model_name)
 
     # Initializing the sentiment model
-    model_name = 'cardiffnlp/twitter-roberta-base-sentiment-latest'
-    sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name, max_length=512,
-                               truncation=True)
+    # model_name = 'cardiffnlp/twitter-roberta-base-sentiment-latest'
+    # sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name, max_length=512,
+    #                            truncation=True)
+
+    classifier, sentiment_model = models_intializer()
+
     # sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name)
 
     # Scraping and processing Amazon reviews
