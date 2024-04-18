@@ -22,4 +22,4 @@ COPY . /app
 EXPOSE 5000
 
 # Run final.py when the container launches
-CMD ["python", "final.py"]
+CMD ["python", "final with dino.py"]
