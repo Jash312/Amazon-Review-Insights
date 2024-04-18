@@ -17,7 +17,7 @@ jobs:
 
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin public.ecr.aws/f4a3t4u4
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/f4a3t4u4
 
       - uses: actions/checkout@v2
 
