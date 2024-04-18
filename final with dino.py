@@ -78,7 +78,7 @@ def models_intializer():
 def scrape_amazon_and_save_to_excel(product_url, req_id):
     product_id = check_exist(product_url)
     if product_id:
-        red_msg(req_id, "Completed", " Generating Insights", product_id)
+        red_msg(req_id, "Completed", "99% Done -  Generating Insights", product_id)
         return product_id
 
     start_time = time.time()
@@ -100,12 +100,17 @@ def scrape_amazon_and_save_to_excel(product_url, req_id):
     excel_file_product_details = '.\\scrapping\\product_details.xlsx'
     excel_file_reviews = '.\\scrapping\\amazon_reviews.xlsx'
 
-    red_msg(req_id, "Incompleted", "Scraping Started")
+    red_msg(req_id, "Incompleted", "5% Done - Scraping Started")
 
     product_details = get_product_details(product_url, excel_file_product_details)
+    counter = 0
     while product_details["Features"] == [""]:
         product_details = get_product_details(product_url, excel_file_product_details)
-    red_msg(req_id, "Incompleted", "Product Details Retrived")
+        counter += 1
+        if counter == 3:
+            print('Invalid URL or pattern not found.')
+            return None
+    red_msg(req_id, "Incompleted", "15% Done - Product Details Retrived")
 
     modified_url = get_scraping_link(product_url)
     print(product_details)
@@ -114,24 +119,24 @@ def scrape_amazon_and_save_to_excel(product_url, req_id):
         star_ratings = ['one', 'two', 'three', 'four', 'five']
         candidate_labels = product_details["Features"]
         candidate_labels = candidate_labels[0].replace(" ", "").split(",")
-        red_msg(req_id, "Incompleted", "Scrapping In Progress")
+        red_msg(req_id, "Incompleted", "25% Done - Scrapping In Progress")
         all_reviews = scrape_amazon_reviews(modified_url, star_ratings, candidate_labels, classifier, sentiment_model)
 
         # Save reviews to Excel
         df = pd.DataFrame(all_reviews)
         df.to_excel(excel_file_reviews, index=False)
         print('Excel is Ready!')
-        red_msg(req_id, "Incompleted", "Scrapping Completed")
+        red_msg(req_id, "Incompleted", "45% Done - Scrapping Completed")
 
         # Insert product info to MongoDB
         product_id = insert_product_info_to_mongodb(product_url, product_details, all_reviews)
-        red_msg(req_id, "Incompleted", "Generating Action Items ")
+        red_msg(req_id, "Incompleted", "55% Done - Generating Action Items ")
         summarize_review.main(product_id, "True", openai_key=api_key)
-        red_msg(req_id, "Incompleted", "Generating Pros and Cons")
+        red_msg(req_id, "Incompleted", "85% Done - Generating Pros and Cons")
         end_time = time.time()
         execution_time = end_time - start_time
         print('Execution time:', execution_time, 'seconds')
-        red_msg(req_id, "Completed", f"Generating Insights, it took {execution_time} seconds", product_id)
+        red_msg(req_id, "Completed", f"99% Done - Generating Insights, it took {execution_time} seconds", product_id)
         return product_id
     else:
         print('Invalid URL or pattern not found.')
