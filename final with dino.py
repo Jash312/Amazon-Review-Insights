@@ -120,7 +120,10 @@ def scrape_amazon_and_save_to_excel(product_url, req_id):
 
 
 def scrape_and_redirect(product_url, req_id):
-    scrape_amazon_and_save_to_excel(product_url, req_id)
+    try:
+        scrape_amazon_and_save_to_excel(product_url, req_id)
+    except Exception as ex:
+        print(f"Problem - {product_url} - {ex}")
 
 
 @app.route('/', methods=['GET', 'POST'])
