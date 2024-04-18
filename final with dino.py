@@ -26,6 +26,7 @@ redis_messages = redis.Redis(
 
 
 
+
 # Load environment variables from .env file
 load_dotenv()
 mongo_uri = "mongodb+srv://Admin:Admin1234@cluster0.lhuhlns.mongodb.net"
@@ -125,7 +126,6 @@ def index():
         req_id = str(uuid.uuid4())
         product_url = request.form['product_url']
         # Start a new thread to run the scraping task
-        print('JAI')
         threading.Thread(target=scrape_and_redirect, args=(product_url,req_id)).start()
         # time.sleep(5000)
         return redirect(url_for('dino', req_id=req_id))

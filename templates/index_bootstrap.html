@@ -24,9 +24,9 @@
                     <h1 class="display-6 fw-bold" style="background-color: rgba(0,0,0,0.5); padding: 10px;">Amazon Review Insights</h1>
                 </div>
                 <!-- Image on the left -->
-                <div class="col-md-3">
+                <div class="col-md-3" style="display: flex; justify-content: center;">
                     <a href="{{ products['Product_URL'] }}">
-                        <img src="{{ products['Image_URL'] }}" alt="{{ products['Title'] }}" class="rounded shadow-lg border border-secondary image" height="350" width="250">
+                        <img src="{{ products['Image_URL'] }}" alt="{{ products['Title'] }}" class="rounded shadow-lg border border-secondary image" style="max-width: 250px; height: 250px;">
                     </a>
                 </div>             
                 <!-- Details on the right -->
@@ -49,7 +49,7 @@
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="action_items1 p-3" id="action_items1" style="display: block; background-color: rgba(255, 255, 255, 0.8); box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);">
-                    <h4 class="text-center">Action items</h4>
+                    <h4 class="text-center">Action items for Sellers</h4>
                     <ul>
                         {% for rev1 in dft['Action Items'] %}
                         <li>{{ rev1 }}</li>
