@@ -1,6 +1,12 @@
 # Use an official Python runtime as a parent image
 FROM python:3.10.7-slim
 
+# Install necessary packages
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        gcc \
+        python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 # Set the working directory in the container
 WORKDIR /app
 
