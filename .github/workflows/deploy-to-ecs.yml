@@ -17,7 +17,7 @@ jobs:
 
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/f4a3t4u4
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 533266987468.dkr.ecr.us-east-1.amazonaws.com/amazon-insights
 
       - uses: actions/checkout@v2
 
@@ -37,5 +37,5 @@ jobs:
       - name: Build and push Docker image
         run: |
           docker build --platform linux/arm64 -t amazon-review-insights .
-          docker tag amazon-review-insights:latest public.ecr.aws/f4a3t4u4/amazon-review-insights:latest
-          docker push public.ecr.aws/f4a3t4u4/amazon-review-insights:latest
+          docker tag amazon-review-insights:latest 533266987468.dkr.ecr.us-east-1.amazonaws.com/amazon-insights/amazon-review-insights:latest
+          docker push 533266987468.dkr.ecr.us-east-1.amazonaws.com/amazon-insights/amazon-review-insights:latest
