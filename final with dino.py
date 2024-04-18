@@ -1,26 +1,23 @@
-from functools import lru_cache
-
-from flask import Flask, render_template, request, redirect, url_for
-import pandas as pd
-import time
-from FINAL_scrape_scoring_sentiment import get_Title, get_product_details, get_scraping_link, scrape_amazon_reviews, \
-    initialize_classifier, insert_product_info_to_mongodb
-from transformers import pipeline
-import plotly.graph_objs as go
-import numpy as np
-import random
-import plotly.io as pio
-from word_cloud import generate_word_cloud
-import pymongo
-from bson.objectid import ObjectId
-import summarize_review
-from summarize_review import get_db
-from dotenv import load_dotenv
+import asyncio
 import os
 import threading
+import time
 import uuid
+from functools import lru_cache
 
+import pandas as pd
+import plotly.graph_objs as go
 import redis
+from bson.objectid import ObjectId
+from dotenv import load_dotenv
+from flask import Flask, render_template, request, redirect, url_for
+from transformers import pipeline
+
+import summarize_review
+from FINAL_scrape_scoring_sentiment import get_Title, get_product_details, get_scraping_link, initialize_classifier, \
+    insert_product_info_to_mongodb, scrape_amazon_reviews_async
+from summarize_review import get_db
+from word_cloud import generate_word_cloud
 
 redis_messages = redis.Redis(
     host='redis-18614.c73.us-east-1-2.ec2.cloud.redislabs.com',
@@ -75,7 +72,7 @@ def models_intializer():
     return classifier, sentiment_model
 
 
-def scrape_amazon_and_save_to_excel(product_url, req_id):
+async def scrape_amazon_and_save_to_excel(product_url, req_id):
     product_id = check_exist(product_url)
     if product_id:
         red_msg(req_id, "Completed", "99% Done -  Generating Insights", product_id)
@@ -83,18 +80,7 @@ def scrape_amazon_and_save_to_excel(product_url, req_id):
 
     start_time = time.time()
 
-    # Initializing the classifier
-    # model_name = "Recognai/zeroshot_selectra_medium"
-    # classifier = initialize_classifier(model_name)
-
-    # Initializing the sentiment model
-    # model_name = 'cardiffnlp/twitter-roberta-base-sentiment-latest'
-    # sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name, max_length=512,
-    #                            truncation=True)
-
     classifier, sentiment_model = models_intializer()
-
-    # sentiment_model = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name)
 
     # Scraping and processing Amazon reviews
     excel_file_product_details = '.\\scrapping\\product_details.xlsx'
@@ -120,7 +106,8 @@ def scrape_amazon_and_save_to_excel(product_url, req_id):
         candidate_labels = product_details["Features"]
         candidate_labels = candidate_labels[0].replace(" ", "").split(",")
         red_msg(req_id, "Incompleted", "25% Done - Scrapping In Progress")
-        all_reviews = scrape_amazon_reviews(modified_url, star_ratings, candidate_labels, classifier, sentiment_model)
+        all_reviews = await scrape_amazon_reviews_async(modified_url, star_ratings, candidate_labels, classifier,
+                                                        sentiment_model)
 
         # Save reviews to Excel
         df = pd.DataFrame(all_reviews)
@@ -131,7 +118,7 @@ def scrape_amazon_and_save_to_excel(product_url, req_id):
         # Insert product info to MongoDB
         product_id = insert_product_info_to_mongodb(product_url, product_details, all_reviews)
         red_msg(req_id, "Incompleted", "55% Done - Generating Action Items ")
-        summarize_review.main(product_id, "True", openai_key=api_key)
+        await summarize_review.main_async(product_id, "True", openai_key=api_key)
         red_msg(req_id, "Incompleted", "85% Done - Generating Pros and Cons")
         end_time = time.time()
         execution_time = end_time - start_time
@@ -145,7 +132,9 @@ def scrape_amazon_and_save_to_excel(product_url, req_id):
 
 def scrape_and_redirect(product_url, req_id):
     try:
-        scrape_amazon_and_save_to_excel(product_url, req_id)
+        loop = asyncio.new_event_loop()  # loop = asyncio.get_event_loop()
+        loop.run_until_complete(scrape_amazon_and_save_to_excel(product_url, req_id))
+        loop.close()
     except Exception as ex:
         print(f"Problem - {product_url} - {ex}")
 

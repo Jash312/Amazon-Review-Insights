@@ -1,8 +1,10 @@
+import asyncio
 import os
 import re
 import time
 from datetime import datetime
 
+import aiohttp
 import pandas as pd
 import pymongo
 import requests
@@ -44,6 +46,14 @@ def get_soup(url):
     # r=requests.get(product_url)
     soup = BeautifulSoup(r.text, 'html.parser')
     return soup
+
+
+async def async_get_soup(url):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f'http://{SPLASH_HOST}/render.html', params={'url': url, 'wait': 2}) as response:
+            html = await response.text()
+            soup = BeautifulSoup(html, 'html.parser')
+            return soup
 
 
 def get_product_details(product_url, excel_file):
@@ -199,7 +209,6 @@ def scrape_amazon_reviews(product_url, star_ratings, candidate_labels, classifie
 
     return reviewlist
 
-
 def insert_product_info_to_mongodb(product_url, product_details, all_reviews):
     product_info = {
         "Product_Details": {
@@ -219,6 +228,33 @@ def insert_product_info_to_mongodb(product_url, product_details, all_reviews):
     print(product_details)
 
     return result.inserted_id
+
+
+async def async_get_reviews(full_url, candidate_labels, classifier, sentiment_model, product_url=None,
+                            star_rating=None):
+    reviewlist = []
+    soup = await async_get_soup(full_url)
+    print(f'Getting reviews for {star_rating} stars asynchronously')
+    reviews = get_reviews(soup, candidate_labels, classifier, sentiment_model, product_url, star_rating)
+    reviewlist.extend(reviews)
+    return reviewlist
+
+
+async def scrape_amazon_reviews_async(product_url, star_ratings, candidate_labels, classifier, sentiment_model):
+    reviewlist = []
+    tasks = []
+
+    for rating in star_ratings:
+        for x in range(1, 11):
+            full_url = f'{product_url}/ref=cm_cr_getr_d_paging_btm_next_{x}?ie=UTF8&reviewerType=all_reviews&filterByStar={rating}_star&pageNumber={x}&sortBy=recent'
+            tasks.append(
+                async_get_reviews(full_url, candidate_labels, classifier, sentiment_model, product_url, rating))
+
+    results = await asyncio.gather(*tasks)
+    for reviews in results:
+        reviewlist.extend(reviews)
+
+    return reviewlist
 
 
 if __name__ == '__main__':
@@ -258,7 +294,8 @@ if __name__ == '__main__':
 
     candidate_labels = product_details["Features"]
     candidate_labels = candidate_labels[0].replace(" ", "").split(",")
-    all_reviews = scrape_amazon_reviews(modified_url, star_ratings, candidate_labels, classifier, sentiment_model)
+    all_reviews = asyncio.run(
+        scrape_amazon_reviews_async(modified_url, star_ratings, candidate_labels, classifier, sentiment_model))
 
     df = pd.DataFrame(all_reviews)
     # df.to_excel(excel_file_reviews, index=False)

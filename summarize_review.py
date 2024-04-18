@@ -184,7 +184,7 @@ async def summarize_by_features_async(llm, object_id):
 
         print("Processing - ", feature)
 
-        chunked_reviews = split_text(row["concatenated"], count=1000)
+        chunked_reviews = split_text(row["concatenated"], count=4000)
         tasks.append(summarize_by_feature_refine_async(llm, product_details["Title"], feature, chunked_reviews))
 
     results = await asyncio.gather(*tasks)
@@ -267,6 +267,24 @@ def main(review_id, is_prod, openai_key):
         llm = get_model(is_prod, olama_config)
 
     pros_cons_by_features, product_details = asyncio.run(summarize_by_features_async(llm, review_id))
+    action_items = get_action_items(llm, product_details["Title"], pros_cons_by_features)
+    end_time = time.time_ns()
+
+    print("Summary and Action Items Processing Time - ", end_time - start_time)
+
+    update_summary(review_id, pros_cons_by_features, action_items)
+
+
+async def main_async(review_id, is_prod, openai_key):
+    start_time = time.time_ns()
+
+    if is_prod:
+        openai_config["api_key"] = openai_key
+        llm = get_model(is_prod, openai_config)
+    else:
+        llm = get_model(is_prod, olama_config)
+
+    pros_cons_by_features, product_details = await summarize_by_features_async(llm, review_id)
     action_items = get_action_items(llm, product_details["Title"], pros_cons_by_features)
     end_time = time.time_ns()
 
