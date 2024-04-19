@@ -32,7 +32,7 @@ To deploy the application:
 1. Configure AWS credentials.
 2. Login to Amazon ECR.
 3. Build and push the Docker image to Amazon ECR.
-4. Deploy the Docker image to Amazon ECS.
+4. Deploy the Docker image to Amazon ECS
 
 ## Contributions
 Jai Vigneshwar Aiyyappan
