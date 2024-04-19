@@ -20,6 +20,7 @@ This repository contains code for a Flask web application that scrapes Amazon pr
 - **Plotly**: Python graphing library used for creating interactive plots.
 - **Bootstrap**: Front-end framework used for styling the web interface.
 - **Docker**: Containerization technology used for packaging the application.
+- **BeautifulSoup** : Scraping Packages used to scrape the reviews from Amazon
 - **AWS**: Cloud infrastructure provider utilized for deployment.
 
 ## Deployment
