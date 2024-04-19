@@ -20,6 +20,7 @@ This repository contains code for a Flask web application that scrapes Amazon pr
 - **Plotly**: Python graphing library used for creating interactive plots.
 - **Bootstrap**: Front-end framework used for styling the web interface.
 - **Docker**: Containerization technology used for packaging the application.
+- **AWS**: Cloud infrastructure provider utilized for deployment.
 
 ## Deployment
 
@@ -31,6 +32,12 @@ To deploy the application:
 2. Login to Amazon ECR.
 3. Build and push the Docker image to Amazon ECR.
 4. Deploy the Docker image to Amazon ECS.
+
+## Contributions
+Jai Vigneshwar Aiyyappan
+Vignesh Baskaran
+Ali Guneysel
+Madhoumithaa Veerasethu 
 
 ## Usage
 
